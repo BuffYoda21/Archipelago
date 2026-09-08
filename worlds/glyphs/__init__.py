@@ -42,6 +42,7 @@ class GlyphsWorld(World):
     shop_prices: list[int]
     buttons: dict[str, ButtonData]
     items: dict[str, ItemData]
+    origin_region_name = "Menu"
 
     # Macros to be used in Macros.py
     macro_init = False
@@ -56,10 +57,6 @@ class GlyphsWorld(World):
     def generate_early(self):
         if not bool(self.options.ButtonSanity.value) and self.options.ButtonShardPercent.value > 0:
             raise OptionError("Button Shard Randomization requires Buttonsanity to be enabled")
-
-        starting_chapter = "Menu"
-        self.multiworld.push_precollected(create_item(self, starting_chapter))
-        self.multiworld.push_precollected(create_item(self, "Map"))
 
         if not self.options.HatShuffle.value:
             for item_name, item_data in hats.items():
