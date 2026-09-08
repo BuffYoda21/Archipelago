@@ -44,6 +44,8 @@ class GlyphsWorld(World):
     items: dict[str, ItemData]
     origin_region_name = "Menu"
 
+    resolved_shard_percent = 0
+
     # Macros to be used in Macros.py
     macro_init = False
     wall_jump_rule: Callable[[CollectionState], bool]
@@ -55,8 +57,9 @@ class GlyphsWorld(World):
         super().__init__(multiworld, player)
 
     def generate_early(self):
-        if not bool(self.options.ButtonSanity.value) and self.options.ButtonShardPercent.value > 0:
-            raise OptionError("Button Shard Randomization requires Buttonsanity to be enabled")
+        # Max value that doesn't cause generation errors
+        if self.options.ButtonSanity.value and self.options.ButtonShardPercent.value > 12:
+            self.resolved_shard_percent = 12
 
         self.multiworld.push_precollected(create_item(self, "Map"))
 
@@ -65,15 +68,17 @@ class GlyphsWorld(World):
                 for _ in range(item_data.count or 1):
                     self.multiworld.push_precollected(create_item(self, item_name))
 
-        early_dash_possibility = True
-
         if self.options.StartingSword.value:
             self.multiworld.push_precollected(create_item(self, "Progressive Sword"))
+        elif not self.options.SwordlessCombat.value:
+            self.multiworld.early_items[self.player]["Progressive Sword"] = 1
+
         if self.options.StartingDash.value:
             self.multiworld.push_precollected(create_item(self, "Progressive Dash Orb"))
-            early_dash_possibility = False
+        else:
+            self.multiworld.early_items[self.player]["Progressive Dash Orb"] = 1
 
-        randomize_buttons(self, self.options.RandomButtonColorPercent.value, self.options.ButtonShardPercent.value)
+        randomize_buttons(self, self.options.RandomButtonColorPercent.value, self.resolved_shard_percent)
 
         early_button_1 = self.buttons["R1C First"]
         early_button_2 = self.buttons["R1C Second"]
@@ -83,9 +88,6 @@ class GlyphsWorld(World):
                 early_button_1.color = ButtonColor.RED
             if early_button_2.color != ButtonColor.RED:
                 early_button_2.color = ButtonColor.RED
-
-        if early_dash_possibility:
-            self.multiworld.early_items[self.player]["Progressive Dash Orb"] = 1
 
         r1_roadblock_button_1 = self.buttons["R1F Right"]
         r1_roadblock_button_2 = self.buttons["R2A Gate Left"]
@@ -118,7 +120,7 @@ class GlyphsWorld(World):
                 #"Multiplayer":             self.options.Multiplayer.value,
                 "DeathLink":               self.options.DeathLink.value,
                 "ButtonColorsRandomized":  self.options.RandomButtonColorPercent.value != 0,
-                "ButtonShardsRandomized":  self.options.ButtonShardPercent.value != 0,
+                "ButtonShardsRandomized":  self.resolved_shard_percent != 0,
                 "WizardRequirements":      self.options.WizardRequirements.value,
                 "WraithRequirements":      self.options.WraithRequirements.value,
                 "WraithSilverCount":       self.options.WraithSilverCount.value,
@@ -142,7 +144,7 @@ class GlyphsWorld(World):
             spoiler_handle.write(f"\nGLYPHS: Smile Shop Prices ({self.player_name}): {get_shop_prices(self)}\n")
         if self.options.RandomButtonColorPercent.value != 0:
             spoiler_handle.write(f"\nGLYPHS: Button Colors ({self.player_name}): {get_button_color_spoiler_data(self)}\n")
-        if self.options.ButtonShardPercent.value != 0:
+        if self.resolved_shard_percent != 0:
             spoiler_handle.write(f"\nGLYPHS: Broken Buttons ({self.player_name}): {get_broken_button_spoiler_data(self)}\n")
 
     def collect(self, state: "CollectionState", item: "Item") -> bool:
