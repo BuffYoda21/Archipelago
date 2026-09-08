@@ -58,6 +58,8 @@ class GlyphsWorld(World):
         if not bool(self.options.ButtonSanity.value) and self.options.ButtonShardPercent.value > 0:
             raise OptionError("Button Shard Randomization requires Buttonsanity to be enabled")
 
+        self.multiworld.push_precollected(create_item(self, "Map"))
+
         if not self.options.HatShuffle.value:
             for item_name, item_data in hats.items():
                 for _ in range(item_data.count or 1):
