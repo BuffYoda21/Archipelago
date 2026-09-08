@@ -66,11 +66,9 @@ class GlyphsWorld(World):
                     self.multiworld.push_precollected(create_item(self, item_name))
 
         early_dash_possibility = True
-        early_sword_possibility = True
 
         if self.options.StartingSword.value:
             self.multiworld.push_precollected(create_item(self, "Progressive Sword"))
-            early_sword_possibility = False
         if self.options.StartingDash.value:
             self.multiworld.push_precollected(create_item(self, "Progressive Dash Orb"))
             early_dash_possibility = False
@@ -80,8 +78,6 @@ class GlyphsWorld(World):
         early_button_1 = self.buttons["R1C First"]
         early_button_2 = self.buttons["R1C Second"]
 
-        #if early_button_1.color != ButtonColor.RED or early_button_2.color != ButtonColor.RED or early_button_1.isBroken or early_button_2.isBroken:
-        #    early_sword_possibility = False
         if not self.options.StartingDash.value:
             if early_button_1.color != ButtonColor.RED:
                 early_button_1.color = ButtonColor.RED
@@ -90,8 +86,6 @@ class GlyphsWorld(World):
 
         if early_dash_possibility:
             self.multiworld.early_items[self.player]["Progressive Dash Orb"] = 1
-        if early_sword_possibility:
-            self.multiworld.early_items[self.player]["Progressive Sword"] = 1
 
         r1_roadblock_button_1 = self.buttons["R1F Right"]
         r1_roadblock_button_2 = self.buttons["R2A Gate Left"]
