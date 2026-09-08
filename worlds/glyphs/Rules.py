@@ -268,7 +268,7 @@ def set_rules(world: "GlyphsWorld"):
     set_rule_from_string(world, "(Void 3) Preminition Reward",                      lambda state: True)
 
     # Randomized Buttons
-    if world.options.ButtonShardPercent.value != 0:
+    if world.options.ButtonSanity.value:
         set_button_rule(world, "R1A Save",              lambda state: can_press_button(state, player, world, "R1A Save"))
         set_button_rule(world, "R1B Lowest",            lambda state: can_press_button(state, player, world, "R1B Lowest"))
         set_button_rule(world, "R1B 2nd Lowest",        lambda state: can_press_buttons(state, player, world, ["R1B Lowest", "R1B 2nd Lowest"])                                                                             and can_dash(state, player))

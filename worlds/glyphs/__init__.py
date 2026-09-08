@@ -1,4 +1,5 @@
 from BaseClasses import MultiWorld, Item, Tutorial
+from Options import OptionError
 from worlds.AutoWorld import World, CollectionState, WebWorld
 from typing import Callable, Dict, TextIO
 
@@ -53,6 +54,9 @@ class GlyphsWorld(World):
         super().__init__(multiworld, player)
 
     def generate_early(self):
+        if not bool(self.options.ButtonSanity.value) and self.options.ButtonShardPercent.value > 0:
+            raise OptionError("Button Shard Randomization requires Buttonsanity to be enabled")
+
         starting_chapter = "Menu"
         self.multiworld.push_precollected(create_item(self, starting_chapter))
         self.multiworld.push_precollected(create_item(self, "Map"))

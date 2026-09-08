@@ -21,7 +21,7 @@ def get_location_names() -> Dict[str, int]:
 
 def is_valid_location(world: "GlyphsWorld", name) -> bool:
     if name in buttonsanity_locations:
-        if world.options.ButtonShardPercent.value > 0:
+        if world.options.ButtonSanity.value:
             return True
         return False
     return True
