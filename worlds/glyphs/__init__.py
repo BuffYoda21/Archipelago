@@ -57,6 +57,8 @@ class GlyphsWorld(World):
         super().__init__(multiworld, player)
 
     def generate_early(self):
+        self.resolved_shard_percent = self.options.ButtonShardPercent.value
+
         # This can be increased if the world gets less restrictive
         if not self.options.ButtonSanity.value and self.options.ButtonShardPercent.value > 5:
             self.resolved_shard_percent = 5
