@@ -235,7 +235,11 @@ def flower_puzzle_completion(state: CollectionState, player: int, world: "Glyphs
         completion += 1
     return completion
 
-def can_access_all_silver_shards(state: CollectionState, player: int) -> bool:
+def can_access_all_silver_shards_old(state: CollectionState, player: int) -> bool:
+    """
+    DEPRICATED
+    Use can_access_all_silver_shards instead
+    """
     return (
         state.can_reach_location("(R1) Silver Shard Puzzle 1 - Map", player) and
         state.can_reach_location("(R1) Silver Shard Puzzle 2 - Grapple", player) and
@@ -252,4 +256,27 @@ def can_access_all_silver_shards(state: CollectionState, player: int) -> bool:
         state.can_reach_location("(R3) Silver Shard Puzzle 13 - Black Button", player) and
         state.can_reach_location("(R3) Silver Shard Puzzle 14 - Grapple", player) and
         state.can_reach_location("(R2) Silver Shard Puzzle 15 - Escape Serpent", player)
+    )
+
+# Should be logically equivalent to can_access_all_silver_shards_old
+def can_access_all_silver_shards(state: CollectionState, world: "GlyphsWorld") -> bool:
+    player = world.player
+    return (
+        can_dash(state, player) and has_grapple(state, player) and (defeated_gilded_serpent(state, player) or can_fight(state, world)) and
+        (can_wall_jump(state, world) or can_press_buttons(state, player, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 6th Lowest"])) and
+        (can_parry(state, player) or (get_button_color(world, "R2G Upper Middle") != ButtonColor.BLACK and can_press_buttons(state, player, world, ["R2G Upper Left", "R2G Upper Middle"]))) and
+        can_press_buttons(state, player, world, ["R1B 4th Lowest", "R1B 5th Lowest", "R2E Lower", "R2G Middle", "R2G Moving Platform", "R2N Chase 1", "R3E Upper"]) and
+        state.can_reach_region("Region 1A", player) and
+        state.can_reach_region("Region 1B", player) and
+        state.can_reach_region("Region 1F", player) and
+        state.can_reach_region("Region 2A", player) and
+        state.can_reach_region("Region 2B", player) and
+        state.can_reach_region("Region 2E", player) and
+        state.can_reach_region("Region 2G", player) and
+        state.can_reach_region("Region 2N", player) and
+        state.can_reach_region("Region 2P", player) and
+        state.can_reach_region("Region 2Q", player) and
+        state.can_reach_region("Region 3B", player) and
+        state.can_reach_region("Region 3E", player) and
+        state.can_reach_region("Region 3I", player)
     )

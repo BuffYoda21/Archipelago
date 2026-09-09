@@ -20,7 +20,7 @@ def connect_entrances(world: "GlyphsWorld"):
     connect_areas(world, "Menu",            "Region 1A",            lambda state: True)
     connect_areas(world, "Region 1A",       "Region 1C",            lambda state: True)
     connect_areas(world, "Region 1A",       "Region 1F",            lambda state: can_dash(state, player))
-    connect_areas(world, "Region 1B",       "Region 1C",            lambda state: can_dash(state, player)                               and (can_wall_jump(state, world)    or can_press_buttons(state, player, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 6th Lowest"])) and can_press_buttons(state, player, world, ["R1B 4th Lowest", "R1B 5th Lowest"]))
+    connect_areas(world, "Region 1B",       "Region 1C",            lambda state: can_dash(state, player)                               and (can_wall_jump(state, world)    or can_press_buttons(state, player, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 6th Lowest"])) and can_press_buttons(state, player, world, ["R1B 4th Lowest", "R1B 5th Lowest", "R1B Map Room"]))
     connect_areas(world, "Region 1B",       "Region 1E",            lambda state: defeated_runic_construct(state, player)               and can_wall_jump(state, world))
     connect_areas(world, "Region 1C",       "Region 1B",            lambda state: can_wall_jump(state, world))
     connect_areas(world, "Region 1C",       "Region 1D",            lambda state: can_press_button(state, player, world, "R1C First")   and (can_wall_jump(state, world)    or can_press_button(state, player, world, "R1C Second")))
@@ -145,7 +145,7 @@ def set_rules(world: "GlyphsWorld"):
     set_rule_from_string(world, "(R1) Sword Pedestal",                              lambda state: True)
     set_rule_from_string(world, "(R1) Runic Construct Reward",                      lambda state: defeated_runic_construct(state, player))
     set_rule_from_string(world, "(R1) Map Pedestal",                                lambda state: can_dash(state, player)                   and can_press_button(state, player, world, "R1B Map Room"))
-    set_rule_from_string(world, "(R1) Silver Shard Puzzle 1 - Map",                 lambda state: can_dash(state, player)                   and can_press_button(state, player, world, "R1B Upper Puzzle") and (get_button_color(world, "R1B Upper Puzzle") == ButtonColor.BLACK or can_press_button(state, player, world, "R1B Save")))
+    set_rule_from_string(world, "(R1) Silver Shard Puzzle 1 - Map",                 lambda state: can_dash(state, player)                   and (can_wall_jump(state, world) or can_press_buttons(state, player, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 6th Lowest"])) and can_press_buttons(state, player, world, ["R1B 4th Lowest", "R1B 5th Lowest", "R1B Upper Puzzle"]) and (get_button_color(world, "R1B Upper Puzzle") == ButtonColor.BLACK or can_press_button(state, player, world, "R1B Save")))
     set_rule_from_string(world, "(R1) Silver Shard Puzzle 2 - Grapple",             lambda state: can_dash(state, player)                   and has_grapple(state, player))
     set_rule_from_string(world, "(R1) Silver Shard Puzzle 3 - Spike Tunnel",        lambda state: can_dash(state, player))
     set_rule_from_string(world, "(R1) Smile Token Puzzle 1 - Hidden Bounce Pad",    lambda state: can_dash(state, player)                   and has_grapple(state, player))
@@ -163,7 +163,7 @@ def set_rules(world: "GlyphsWorld"):
     if world.options.DashPuzzlesSolved.value:
         set_rule_from_string(world, "(R2) Silver Shard Puzzle 9 - Color Dash Puzzle", lambda state: can_dash(state, player))
     else:
-        set_rule_from_string(world, "(R2) Silver Shard Puzzle 9 - Color Dash Puzzle", lambda state: can_dash(state, player)                 and state.can_reach_location("(R1) Color Cypher Room Pickup", player))
+        set_rule_from_string(world, "(R2) Silver Shard Puzzle 9 - Color Dash Puzzle", lambda state: can_dash(state, player)                 and state.can_reach_region("Region 1A", player))
     set_rule_from_string(world, "(R2) Silver Shard Puzzle 15 - Escape Serpent",     lambda state: can_dash(state, player)                   and can_press_button(state, player, world, "R2N Chase 1")   and (defeated_gilded_serpent(state, player) or can_fight(state, world)))
     set_rule_from_string(world, "(R2S2) Smile Token Puzzle 3 - Car Hall",           lambda state: can_dash(state, player))
     set_rule_from_string(world, "(R2) Smile Token Puzzle 6 - Above Serpent",        lambda state: can_dash(state, player)                   and defeated_gilded_serpent(state, player)                  and can_press_button(state, player, world, "R2N Save"))
@@ -184,7 +184,7 @@ def set_rules(world: "GlyphsWorld"):
     if world.options.DashPuzzlesSolved.value:
         set_rule_from_string(world, "(R2S2) Master Puzzle 1 - Map",                 lambda state: can_dash(state, player)                   and state.has("Silver Shard", player, 15))
     else:
-        set_rule_from_string(world, "(R2S2) Master Puzzle 1 - Map",                 lambda state: can_dash(state, player)                   and state.has("Silver Shard", player, 15)                   and can_access_all_silver_shards(state, player))
+        set_rule_from_string(world, "(R2S2) Master Puzzle 1 - Map",                 lambda state: can_dash(state, player)                   and state.has("Silver Shard", player, 15)                   and can_access_all_silver_shards(state, world))
 
 
     # Region 3
