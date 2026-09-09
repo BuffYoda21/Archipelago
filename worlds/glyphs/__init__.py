@@ -57,9 +57,9 @@ class GlyphsWorld(World):
         super().__init__(multiworld, player)
 
     def generate_early(self):
-        # Max value that doesn't cause generation errors
-        if self.options.ButtonSanity.value and self.options.ButtonShardPercent.value > 12:
-            self.resolved_shard_percent = 12
+        # This can be increased if the world gets less restrictive
+        if not self.options.ButtonSanity.value and self.options.ButtonShardPercent.value > 5:
+            self.resolved_shard_percent = 5
 
         self.multiworld.push_precollected(create_item(self, "Map"))
 
