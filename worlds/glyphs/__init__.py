@@ -44,8 +44,6 @@ class GlyphsWorld(World):
     items: dict[str, ItemData]
     origin_region_name = "Menu"
 
-    resolved_shard_percent = 0
-
     # Macros to be used in Macros.py
     macro_init = False
     wall_jump_rule: Callable[[CollectionState], bool]
@@ -57,11 +55,10 @@ class GlyphsWorld(World):
         super().__init__(multiworld, player)
 
     def generate_early(self):
-        self.resolved_shard_percent = self.options.ButtonShardPercent.value
-
         # This can be increased if the world gets less restrictive
-        if not self.options.ButtonSanity.value and self.options.ButtonShardPercent.value > 5:
-            self.resolved_shard_percent = 5
+        # Goal is to keep failure rate <=0.1% in the fuzzer
+        if not self.options.ButtonSanity.value and self.options.ButtonShardPercent.value > 1:
+            self.options.ButtonShardPercent.value = 1
 
         self.multiworld.push_precollected(create_item(self, "Map"))
 
@@ -80,7 +77,7 @@ class GlyphsWorld(World):
         else:
             self.multiworld.early_items[self.player]["Progressive Dash Orb"] = 1
 
-        randomize_buttons(self, self.options.RandomButtonColorPercent.value, self.resolved_shard_percent)
+        randomize_buttons(self, self.options.RandomButtonColorPercent.value, self.options.ButtonShardPercent.value)
 
         early_button_1 = self.buttons["R1C First"]
         early_button_2 = self.buttons["R1C Second"]
@@ -122,7 +119,7 @@ class GlyphsWorld(World):
                 #"Multiplayer":             self.options.Multiplayer.value,
                 "DeathLink":               self.options.DeathLink.value,
                 "ButtonColorsRandomized":  self.options.RandomButtonColorPercent.value != 0,
-                "ButtonShardsRandomized":  self.resolved_shard_percent != 0,
+                "ButtonShardsRandomized":  self.options.ButtonShardPercent.value != 0,
                 "WizardRequirements":      self.options.WizardRequirements.value,
                 "WraithRequirements":      self.options.WraithRequirements.value,
                 "WraithSilverCount":       self.options.WraithSilverCount.value,
@@ -146,7 +143,7 @@ class GlyphsWorld(World):
             spoiler_handle.write(f"\nGLYPHS: Smile Shop Prices ({self.player_name}): {get_shop_prices(self)}\n")
         if self.options.RandomButtonColorPercent.value != 0:
             spoiler_handle.write(f"\nGLYPHS: Button Colors ({self.player_name}): {get_button_color_spoiler_data(self)}\n")
-        if self.resolved_shard_percent != 0:
+        if self.options.ButtonShardPercent.value != 0:
             spoiler_handle.write(f"\nGLYPHS: Broken Buttons ({self.player_name}): {get_broken_button_spoiler_data(self)}\n")
 
     def collect(self, state: "CollectionState", item: "Item") -> bool:
