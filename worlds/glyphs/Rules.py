@@ -10,7 +10,6 @@ if TYPE_CHECKING:
 
 def connect_entrances(world: "GlyphsWorld"):
     player = world.player
-    state = CollectionState(world.multiworld)
 
     if not world.macro_init:
         set_macro_rules(world)
@@ -19,22 +18,28 @@ def connect_entrances(world: "GlyphsWorld"):
     # ----------------------from----------------to---------------------------------------------conditions--------------------------------
     connect_areas(world, "Menu",            "Region 1A",            lambda state: True)
     connect_areas(world, "Region 1A",       "Region 1C",            lambda state: True)
-    connect_areas(world, "Region 1A",       "Region 1F",            lambda state: can_dash(state, player))
-    connect_areas(world, "Region 1B",       "Region 1C",            lambda state: can_dash(state, player)                           and (can_wall_jump(state, world)    or can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 6th Lowest"])) and can_press_buttons(state, world, ["R1B 4th Lowest", "R1B 5th Lowest", "R1B Map Room"]))
-    connect_areas(world, "Region 1B",       "Region 1E",            lambda state: defeated_runic_construct(state, player)           and can_wall_jump(state, world))
-    connect_areas(world, "Region 1C",       "Region 1B",            lambda state: can_wall_jump(state, world))
-    connect_areas(world, "Region 1C",       "Region 1D",            lambda state: can_press_buttons(state, world, ["R1C First"])    and (can_wall_jump(state, world)    or can_press_buttons(state, world, ["R1C Second"])))
-    connect_areas(world, "Region 1C",       "Region 1F",            lambda state: False)    # with current flower puzzle implementation it makes this check inaccurate but it never actually comes into play
+    connect_areas(world, "Region 1A",       "Region 1F",            lambda state: True)
+    if world.options.LogicalWallJumps.value:
+        connect_areas(world, "Region 1B",   "Region 1C",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R1B 4th Lowest", "R1B 5th Lowest", "R1B Map Room"]))
+        connect_areas(world, "Region 1B",   "Region 1E",            lambda state: can_dash(state, player)                           and defeated_runic_construct(state, player))
+        connect_areas(world, "Region 1C",   "Region 1B",            lambda state: can_dash(state, player))
+        connect_areas(world, "Region 1C",   "Region 1D",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R1C First"]))
+    else:
+        connect_areas(world, "Region 1B",   "Region 1C",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 6th Lowest", "R1B Map Room"]))
+        connect_areas(world, "Region 1C",   "Region 1D",            lambda state: can_press_buttons(state, world, ["R1C First", "R1C Second"]))
     if world.options.FlowerPuzzleSkips.value:
         world.multiworld.register_indirect_condition(world.get_region("Region 1E"),
-            connect_areas(world, "Region 1D", "Region 1B",          lambda state: can_press_buttons(state, world, ["R1B Save"])     and flower_puzzle_completion(state, world) >= 1)
+            connect_areas(world, "Region 1D", "Region 1B",          lambda state: can_press_buttons(state, world, ["R1B Save"])     and flower_puzzle_completion(state, world, 1))
         )
     connect_areas(world, "Region 1D",       "Region 1E",            lambda state: True)
     connect_areas(world, "Region 1E",       "Region 1B",            lambda state: defeated_runic_construct(state, player)           and can_dash(state, player))
     connect_areas(world, "Region 1E",       "Region 1D",            lambda state: can_dash(state, player))
     connect_areas(world, "Region 1F",       "Region 1A",            lambda state: can_dash(state, player))
     connect_areas(world, "Region 1F",       "Region 1C",            lambda state: True)
-    connect_areas(world, "Region 1F",       "Region 2A",            lambda state: can_wall_jump(state, world)                       or (can_dash(state, player)         and can_press_buttons(state, world, ["R1F Right"])))
+    if world.options.LogicalWallJumps.value:
+        connect_areas(world, "Region 1F",   "Region 2A",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R1F Right"]))
+    else:
+        connect_areas(world, "Region 1F",   "Region 2A",            lambda state: can_dash(state, player))
     connect_areas(world, "Region 2A",       "Region 1F",            lambda state: True)
     connect_areas(world, "Region 2A",       "Region 2B",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R2A Gate Left", "R2A Upper"]))
     connect_areas(world, "Region 2B",       "Region 2E",            lambda state: can_dash(state, player))
@@ -42,9 +47,12 @@ def connect_entrances(world: "GlyphsWorld"):
     connect_areas(world, "Region 2B",       "Region 2N",            lambda state: serpent_door_open(state, world))
     connect_areas(world, "Region 2B",       "The Between",          lambda state: can_dash(state, player))
     connect_areas(world, "Region 2C",       "Region 2D",            lambda state: True)
-    connect_areas(world, "Region 2D",       "Region 2C",            lambda state: True) # needs to change when save button sanity is implemented
+    connect_areas(world, "Region 2D",       "Region 2C",            lambda state: True) # needs to change if save button sanity is ever implemented
   # connect_areas(world, "Region 2E",       "Region 2B",            lambda state: True) # this actually doesnt work since the path is blocked off from this angle if you havn't visited the region before
-    connect_areas(world, "Region 2E",       "Region 2D",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R2E Lower", "R2D Save"]) and (get_button_color(world, "R2D Save") == ButtonColor.GREEN or can_press_buttons(state, world, ["R2E Upper Puzzle"])))
+    if get_button_color(world, "R2D Save") == ButtonColor.GREEN:
+        connect_areas(world, "Region 2E",   "Region 2D",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R2E Lower", "R2D Save"]))
+    else:
+        connect_areas(world, "Region 2E",   "Region 2D",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R2E Lower", "R2E Upper Puzzle", "R2D Save"]))
     connect_areas(world, "Region 2E",       "Region 2F",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R2G Hidden"]))
     connect_areas(world, "Region 2E",       "Region 2G",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R2G Lower"]))
     connect_areas(world, "Region 2F",       "Region 2E",            lambda state: True)
@@ -53,13 +61,19 @@ def connect_entrances(world: "GlyphsWorld"):
     connect_areas(world, "Region 2G",       "Region 2I",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R2G Middle", "R2G Upper Right"]) and (can_parry(state, player) or can_press_buttons(state, world, ["R2G Upper Left", "R2G Upper Middle"])))
     if world.options.FlowerPuzzleSkips.value:
         world.multiworld.register_indirect_condition(world.get_region("Region 1E"),
-            connect_areas(world, "Region 2G", "Region 2O",          lambda state: flower_puzzle_completion(state, world) >= 2)
+            connect_areas(world, "Region 2G", "Region 2O",          lambda state: flower_puzzle_completion(state, world, 2))
         )
     connect_areas(world, "Region 2I",       "Region 2H",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R2H Lower", "R2I Lower Left", "R2I Lower Middle", "R2I Upper Left", "R2I Upper Middle", "R2I Right"]))
-    connect_areas(world, "Region 2I",       "Region 2J",            lambda state: can_wall_jump(state, world)                       or (can_dash(state, player)         and can_press_buttons(state, world, ["R2I Lower Left", "R2I Lower Middle", "R2I Right"])))
+    if world.options.LogicalWallJumps.value:
+        connect_areas(world, "Region 2I",   "Region 2J",            lambda state: can_dash(state, player))
+    else:
+        connect_areas(world, "Region 2I",   "Region 2J",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R2I Lower Left", "R2I Lower Middle", "R2I Right"]))
   # connect_areas(world, "Region 2J",       "Region 2I",            lambda state: can_chain_wall_jumps(state, player, world))   # logically will never be needed without save button sanity
     connect_areas(world, "Region 2J",       "Region 2K",            lambda state: shadow_chase_open(state, world))
-    connect_areas(world, "Region 2L",       "Region 2M",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Left", "R2L Decent Upper Right", "R2L Decent Upper Middle", "R2L Decent Middle", "R2L Decent Lower"]) and (get_button_color(world, "R2L Decent Middle") != ButtonColor.GREEN or get_button_color(world, "R2L Decent Lower") != ButtonColor.GREEN or has_sword(state, player)))
+    if get_button_color(world, "R2L Decent Middle") != ButtonColor.GREEN or get_button_color(world, "R2L Decent Lower") != ButtonColor.GREEN:
+        connect_areas(world, "Region 2L",   "Region 2M",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Left", "R2L Decent Upper Right", "R2L Decent Upper Middle", "R2L Decent Middle", "R2L Decent Lower"]))
+    else:
+        connect_areas(world, "Region 2L",   "Region 2M",            lambda state: can_dash(state, player)                           and has_sword(state, player)        and can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Left", "R2L Decent Upper Right", "R2L Decent Upper Middle", "R2L Decent Middle", "R2L Decent Lower"]))
     connect_areas(world, "Region 2L",       "Region 4A",            lambda state: wizard_true_defeat(state, player))
     connect_areas(world, "Region 2N",       "Region 2O",            lambda state: defeated_gilded_serpent(state, player)            and can_dash(state, player)         and can_press_buttons(state, world, ["R2N Chase 1"]))
     connect_areas(world, "Region 2O",       "Region 2P",            lambda state: defeated_gilded_serpent(state, player))
@@ -68,27 +82,58 @@ def connect_entrances(world: "GlyphsWorld"):
     connect_areas(world, "Region 2Q",       "Region 3A",            lambda state: True)
     connect_areas(world, "Region 2Q",       "Dark Region A",        lambda state: can_dash(state, player))
     if world.options.FlowerPuzzleSkips.value:
-        world.multiworld.register_indirect_condition(world.get_region("Region 1E"),
-            connect_areas(world, "Region 3A", "Region 2M",          lambda state: flower_puzzle_completion(state, world) == 3)
-        )
+        connect_areas(world, "Region 3A",   "Region 2M",            lambda state: state.has("Solve Flower Puzzle", player))
     connect_areas(world, "Region 3A",       "Region 3B",            lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R3A Left"]))
     connect_areas(world, "Region 3A",       "Region 3E",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R3A Middle Upper", "R3A Middle Lower"]))
     connect_areas(world, "Region 3A",       "Region 3G",            lambda state: can_dash(state, player)                           and has_grapple(state, player))
     if world.options.FlowerPuzzleSkips.value:
-        world.multiworld.register_indirect_condition(world.get_region("Region 1E"),
-            connect_areas(world, "Region 3A", "Region 4F",          lambda state: can_press_buttons(state, world, ["R4F Save"])     and flower_puzzle_completion(state, world) == 3)
-        )
+        connect_areas(world, "Region 3A",   "Region 4F",            lambda state: can_press_buttons(state, world, ["R4F Save"])     and state.has("Solve Flower Puzzle", player))
     connect_areas(world, "Region 3B",       "Region 3C",            lambda state: can_dash(state, player))
     connect_areas(world, "Region 3C",       "Region 3D",            lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R3C Left", "R3C Middle", "R3C Right", "R3C Gate Right"]))
     connect_areas(world, "Region 3E",       "Region 3F",            lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R3E Upper", "R3E Lower Room 1", "R3E Lower Room 2", "R3E Lower Room 3"]))
     connect_areas(world, "Region 3E",       "Collapse",             lambda state: can_dash(state, player)                           and has_grapple(state, player)       and collapse_available(state, player) and can_press_buttons(state, world, ["R3E Upper"]))
-    connect_areas(world, "Region 3G",       "Region 3H",            lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R3G Right"]) and ((get_button_color(world, "R3G Right") == ButtonColor.GREEN and has_sword(state, player)) or can_press_buttons(state, world, ["R3G Left"])))
+    if get_button_color(world, "R3G Right") == ButtonColor.GREEN:
+        connect_areas(world, "Region 3G",   "Region 3H",            lambda state: can_dash(state, player)                           and has_grapple(state, player)       and (has_sword(state, player)) or can_press_buttons(state, world, ["R3G Left"]) and can_press_buttons(state, world, ["R3G Right"]))
+    else:
+        connect_areas(world, "Region 3G",   "Region 3H",            lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R3G Left", "R3G Right"]))
     connect_areas(world, "Region 3H",       "Region 3I",            lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R3H Left", "R3H Middle", "R3H Right", "R3H Gate Left"]))
     connect_areas(world, "Region 4A",       "Region 4B",            lambda state: can_dash_attack(state, player)                    and has_grapple(state, player)       and can_press_buttons(state, world, ["R4A Left", "R4A Middle", "R4A Right"]))
     connect_areas(world, "Region 4B",       "Region 4C",            lambda state: defeated_spearman(state, player))
-    connect_areas(world, "Region 4C",       "Region 4D",            lambda state: can_dash(state, player)                           and has_grapple(state, player)       and (get_button_color(world, "R4C 4th") != ButtonColor.PINK or can_press_buttons(state, world, ["R4C 3rd"])) and (get_button_color(world, "R4C 5th") == ButtonColor.GREEN or can_press_buttons(state, world, ["R4C 6th"])) and (get_button_color(world, "R4C 9th") != ButtonColor.PINK or can_press_buttons(state, world, ["R4C 10th"])) and can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 4th", "R4C 5th", "R4C 7th", "R4C 8th", "R4C 9th", "R4C 5 Parry 1", "R4C 5 Parry 2", "R4C 5 Parry 3", "R4C 5 Parry 4", "R4C 5 Parry 5", "R4C Gate Right"]))
+  # Original rule kept here for reference cause this got complicated
+  # connect_areas(world, "Region 4C",       "Region 4D",            lambda state: can_dash(state, player)                           and has_grapple(state, player)       and (get_button_color(world, "R4C 4th") != ButtonColor.PINK or can_press_buttons(state, world, ["R4C 3rd"])) and (get_button_color(world, "R4C 5th") == ButtonColor.GREEN or can_press_buttons(state, world, ["R4C 6th"])) and (get_button_color(world, "R4C 9th") != ButtonColor.PINK or can_press_buttons(state, world, ["R4C 10th"])) and can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 4th", "R4C 5th", "R4C 7th", "R4C 8th", "R4C 9th", "R4C 5 Parry 1", "R4C 5 Parry 2", "R4C 5 Parry 3", "R4C 5 Parry 4", "R4C 5 Parry 5", "R4C Gate Right"]))
+    if get_button_color(world, "R4C 4th") == ButtonColor.PINK:
+        if get_button_color(world, "R4C 5th") == ButtonColor.GREEN:
+            if get_button_color(world, "R4C 9th") == ButtonColor.PINK:
+                connect_areas(world, "Region 4C", "Region 4D",      lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 3rd", "R4C 4th", "R4C 5th", "R4C 7th", "R4C 8th", "R4C 9th", "R4C 10th", "R4C 5 Parry 1", "R4C 5 Parry 2", "R4C 5 Parry 3", "R4C 5 Parry 4", "R4C 5 Parry 5", "R4C Gate Right"]))
+            else:
+                connect_areas(world, "Region 4C", "Region 4D",      lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 3rd", "R4C 4th", "R4C 5th", "R4C 7th", "R4C 8th", "R4C 9th", "R4C 5 Parry 1", "R4C 5 Parry 2", "R4C 5 Parry 3", "R4C 5 Parry 4", "R4C 5 Parry 5", "R4C Gate Right"]))
+        else:
+            if get_button_color(world, "R4C 9th") == ButtonColor.PINK:
+                connect_areas(world, "Region 4C", "Region 4D",      lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 3rd", "R4C 4th", "R4C 5th", "R4C 6th", "R4C 7th", "R4C 8th", "R4C 9th", "R4C 10th", "R4C 5 Parry 1", "R4C 5 Parry 2", "R4C 5 Parry 3", "R4C 5 Parry 4", "R4C 5 Parry 5", "R4C Gate Right"]))
+            else:
+                connect_areas(world, "Region 4C", "Region 4D",      lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 3rd", "R4C 4th", "R4C 5th", "R4C 6th", "R4C 7th", "R4C 8th", "R4C 9th", "R4C 5 Parry 1", "R4C 5 Parry 2", "R4C 5 Parry 3", "R4C 5 Parry 4", "R4C 5 Parry 5", "R4C Gate Right"]))
+    else:
+        if get_button_color(world, "R4C 5th") == ButtonColor.GREEN:
+            if get_button_color(world, "R4C 9th") == ButtonColor.PINK:
+                connect_areas(world, "Region 4C", "Region 4D",      lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 4th", "R4C 5th", "R4C 7th", "R4C 8th", "R4C 9th", "R4C 10th", "R4C 5 Parry 1", "R4C 5 Parry 2", "R4C 5 Parry 3", "R4C 5 Parry 4", "R4C 5 Parry 5", "R4C Gate Right"]))
+            else:
+                connect_areas(world, "Region 4C", "Region 4D",      lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 4th", "R4C 5th", "R4C 7th", "R4C 8th", "R4C 9th", "R4C 5 Parry 1", "R4C 5 Parry 2", "R4C 5 Parry 3", "R4C 5 Parry 4", "R4C 5 Parry 5", "R4C Gate Right"]))
+        else:
+            if get_button_color(world, "R4C 9th") == ButtonColor.PINK:
+                connect_areas(world, "Region 4C", "Region 4D",      lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 4th", "R4C 5th", "R4C 6th", "R4C 7th", "R4C 8th", "R4C 9th", "R4C 10th", "R4C 5 Parry 1", "R4C 5 Parry 2", "R4C 5 Parry 3", "R4C 5 Parry 4", "R4C 5 Parry 5", "R4C Gate Right"]))
+            else:
+                connect_areas(world, "Region 4C", "Region 4D",      lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 4th", "R4C 5th", "R4C 6th", "R4C 7th", "R4C 8th", "R4C 9th", "R4C 5 Parry 1", "R4C 5 Parry 2", "R4C 5 Parry 3", "R4C 5 Parry 4", "R4C 5 Parry 5", "R4C Gate Right"]))
     connect_areas(world, "Region 4D",       "Region 4E",            lambda state: can_dash(state, player)                           and can_press_buttons(state, world, ["R4E Save"]))
-    connect_areas(world, "Region 4D",       "Region 4G",            lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_parry(state, player)        and (can_wall_jump(state, world) or can_press_buttons(state, world, ["R4D Main Route 2nd", "R4D Main Route 3rd", "R4D Main Route 4th"])) and (get_button_color(world, "R4D Main Route 5th") == ButtonColor.GREEN or can_press_buttons(state, world, ["R4D Main Route 6th"])) and can_press_buttons(state, world, ["R4D Main Route 1st", "R4D Main Route 5th"]))
+    if world.options.LogicalWallJumps.value:
+        if get_button_color(world, "R4D Main Route 5th") == ButtonColor.GREEN:
+            connect_areas(world, "Region 4D", "Region 4G",          lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_parry(state, player)        and can_press_buttons(state, world, ["R4D Main Route 1st", "R4D Main Route 5th"]))
+        else:
+            connect_areas(world, "Region 4D", "Region 4G",          lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_parry(state, player)        and can_press_buttons(state, world, ["R4D Main Route 1st", "R4D Main Route 5th", "R4D Main Route 6th"]))
+    else:
+        if get_button_color(world, "R4D Main Route 5th") == ButtonColor.GREEN:
+            connect_areas(world, "Region 4D", "Region 4G",          lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_parry(state, player)        and can_press_buttons(state, world, ["R4D Main Route 1st", "R4D Main Route 2nd", "R4D Main Route 3rd", "R4D Main Route 4th", "R4D Main Route 5th"]))
+        else:
+            connect_areas(world, "Region 4D", "Region 4G",          lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_parry(state, player)        and can_press_buttons(state, world, ["R4D Main Route 1st", "R4D Main Route 2nd", "R4D Main Route 3rd", "R4D Main Route 4th", "R4D Main Route 6th", "R4D Main Route 5th"]))
     connect_areas(world, "Region 4G",       "Region 4F",            lambda state: True)
     connect_areas(world, "Region 4G",       "Region 4H",            lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R4F Lower", "R4G 1st", "R4G 2nd", "R4G 3rd", "R4G 4th", "R4G 5th", "R4G 6th"]))
     connect_areas(world, "Region 4H",       "Region 4I",            lambda state: can_dash(state, player)                           and has_grapple(state, player)       and can_press_buttons(state, world, ["R4H Middle"]))
@@ -106,7 +151,6 @@ def connect_entrances(world: "GlyphsWorld"):
 def set_rules(world: "GlyphsWorld"):
     player = world.player
     options = world.options
-    state = CollectionState(world.multiworld) 
 
     if not world.macro_init:
         set_macro_rules(world)
@@ -117,13 +161,16 @@ def set_rules(world: "GlyphsWorld"):
     # Event Locations
     set_rule_from_string(world, "Defeat Runic Construct",                           lambda state: can_fight(state, world))
     set_rule_from_string(world, "Stalker Sigil 1",                                  lambda state: stalker_sigils_present(state, player))
-    set_rule_from_string(world, "Serpent Lock 1",                                   lambda state: can_dash(state, player)                       and can_press_buttons(state, world, ["R2E Lower", "R2E Upper", "R2E Serpent Lock 1"]))
+    if world.options.LogicalWallJumps.value:
+        set_rule_from_string(world, "Serpent Lock 1",                               lambda state: can_dash(state, player)                       and can_press_buttons(state, world, ["R2E Lower", "R2E Serpent Lock 1"]))
+    else:
+        set_rule_from_string(world, "Serpent Lock 1",                               lambda state: can_dash(state, player)                       and can_press_buttons(state, world, ["R2E Lower", "R2E Upper", "R2E Serpent Lock 1"]))
     set_rule_from_string(world, "Serpent Lock 2",                                   lambda state: can_dash(state, player)                       and can_press_buttons(state, world, ["R2H Serpent Lock 2"]))
     set_rule_from_string(world, "Serpent Lock 3",                                   lambda state: can_press_buttons(state, world, ["R2M Serpent Lock 3"]))
     set_rule_from_string(world, "Defeat Gilded Serpent",                            lambda state: can_dash(state, player)                       and can_fight(state, world)                 and can_press_buttons(state, world, ["R2N Chase 1"]))
     set_rule_from_string(world, "Stalker Sigil 2",                                  lambda state: stalker_sigils_present(state, player))
     set_rule_from_string(world, "Stalker Sigil 3",                                  lambda state: stalker_sigils_present(state, player))
-    set_rule_from_string(world, "Solve Flower Puzzle",                              lambda state: flower_puzzle_completion(state, world) == 3)
+    set_rule_from_string(world, "Solve Flower Puzzle",                              lambda state: flower_puzzle_completion(state, world, 3))
     set_rule_from_string(world, "Collapse Unlock",                                  lambda state: can_dash(state, player)                       and wizard_fight_available(state, world)    and can_fight(state, world)                                 and has_grapple(state, player)  and can_press_buttons(state, world, ["R3E Upper"]))
     set_rule_from_string(world, "Wizard True Defeat",                               lambda state: can_dash_attack(state, player)                and wizard_fight_available(state, world)    and can_fight(state, world)                                 and has_grapple(state, player)  and can_press_buttons(state, world, ["R3E Upper"]))
     set_rule_from_string(world, "Defeat Spearman",                                  lambda state: can_dash_attack(state, player)                and can_fight(state, world))
@@ -145,12 +192,24 @@ def set_rules(world: "GlyphsWorld"):
     set_rule_from_string(world, "(R1) Sword Pedestal",                              lambda state: True)
     set_rule_from_string(world, "(R1) Runic Construct Reward",                      lambda state: defeated_runic_construct(state, player))
     set_rule_from_string(world, "(R1) Map Pedestal",                                lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B Map Room"]))
-    set_rule_from_string(world, "(R1) Silver Shard Puzzle 1 - Map",                 lambda state: can_dash(state, player)                   and (can_wall_jump(state, world) or can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 6th Lowest"])) and can_press_buttons(state, world, ["R1B 4th Lowest", "R1B 5th Lowest", "R1B Upper Puzzle"]) and (get_button_color(world, "R1B Upper Puzzle") == ButtonColor.BLACK or can_press_buttons(state, world, ["R1B Save"])))
+    if world.options.LogicalWallJumps.value:
+        if get_button_color(world, "R1B Upper Puzzle") == ButtonColor.BLACK:
+            set_rule_from_string(world, "(R1) Silver Shard Puzzle 1 - Map",         lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B 4th Lowest", "R1B 5th Lowest", "R1B Upper Puzzle"]))
+        else:
+            set_rule_from_string(world, "(R1) Silver Shard Puzzle 1 - Map",         lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B 4th Lowest", "R1B 5th Lowest", "R1B Upper Puzzle", "R1B Save"]))
+    else:
+        if get_button_color(world, "R1B Upper Puzzle") == ButtonColor.BLACK:
+            set_rule_from_string(world, "(R1) Silver Shard Puzzle 1 - Map",         lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 6th Lowest", "R1B Upper Puzzle"]))
+        else:
+            set_rule_from_string(world, "(R1) Silver Shard Puzzle 1 - Map",         lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 6th Lowest", "R1B Upper Puzzle", "R1B Save"]))
     set_rule_from_string(world, "(R1) Silver Shard Puzzle 2 - Grapple",             lambda state: can_dash(state, player)                   and has_grapple(state, player))
     set_rule_from_string(world, "(R1) Silver Shard Puzzle 3 - Spike Tunnel",        lambda state: can_dash(state, player))
     set_rule_from_string(world, "(R1) Smile Token Puzzle 1 - Hidden Bounce Pad",    lambda state: can_dash(state, player)                   and has_grapple(state, player))
-    set_rule_from_string(world, "(R1) Smile Token Puzzle 9 - Moving Platforms",     lambda state: can_wall_jump(state, world)               or (can_dash(state, player) and can_press_buttons(state, world, ["R1B Lower Puzzle", "R1B Lowest"])))
-    set_rule_from_string(world, "(R1) Color Cypher Room Pickup",                    lambda state: can_dash(state, player))
+    if world.options.LogicalWallJumps.value:
+        set_rule_from_string(world, "(R1) Smile Token Puzzle 9 - Moving Platforms", lambda state: can_dash(state, player))
+    else:
+        set_rule_from_string(world, "(R1) Smile Token Puzzle 9 - Moving Platforms", lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B Lower Puzzle", "R1B Lowest"]))
+    set_rule_from_string(world, "(R1) Color Cypher Room Pickup",                    lambda state: True)
     set_rule_from_string(world, "(R1) Master Puzzle 2 - Silence",                   lambda state: can_dash(state, player)                   and has_grapple(state, player))
 
 
@@ -158,7 +217,10 @@ def set_rules(world: "GlyphsWorld"):
     set_rule_from_string(world, "(R2S1) Silver Shard Puzzle 4 - Save Button",       lambda state: can_press_buttons(state, world, ["R2D Save"]))
     set_rule_from_string(world, "(R2) Silver Shard Puzzle 5 - Respawn",             lambda state: can_dash(state, player)                   and state.can_reach_region("Region 2B", player)) # change this to being able to access certain save buttons one save button sanity is implemented
     set_rule_from_string(world, "(R2) Silver Shard Puzzle 6 - Invisible",           lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R2B Puzzle"]))
-    set_rule_from_string(world, "(R2S2) Silver Shard Puzzle 7 - Timed",             lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R2G Middle", "R2G Moving Platform"]) and (can_parry(state, player) or (get_button_color(world, "R2G Upper Middle") != ButtonColor.BLACK and can_press_buttons(state, world, ["R2G Upper Left", "R2G Upper Middle"]))))
+    if get_button_color(world, "R2G Upper Middle") == ButtonColor.BLACK:
+        set_rule_from_string(world, "(R2S2) Silver Shard Puzzle 7 - Timed",         lambda state: can_dash(state, player)                   and can_parry(state, player) and can_press_buttons(state, world, ["R2G Middle", "R2G Moving Platform"]))
+    else:
+        set_rule_from_string(world, "(R2S2) Silver Shard Puzzle 7 - Timed",         lambda state: can_dash(state, player)                   and (can_parry(state, player) or can_press_buttons(state, world, ["R2G Upper Left", "R2G Upper Middle"])) and can_press_buttons(state, world, ["R2G Middle", "R2G Moving Platform"]))
     set_rule_from_string(world, "(R2) Silver Shard Puzzle 8 - Avoid Respawn",       lambda state: can_dash(state, player)                   and has_grapple(state, player) and can_press_buttons(state, world, ["R2P Puzzle"]))
     if world.options.DashPuzzlesSolved.value:
         set_rule_from_string(world, "(R2) Silver Shard Puzzle 9 - Color Dash Puzzle", lambda state: can_dash(state, player))
@@ -175,9 +237,12 @@ def set_rules(world: "GlyphsWorld"):
     set_rule_from_string(world, "(R2S1) Near Shooters Pickup",                      lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R2E Lower"]))
     set_rule_from_string(world, "(R2S3) Collapsed Tunnel Pickup",                   lambda state: True)
     set_rule_from_string(world, "(R2) Nest Room Pickup",                            lambda state: can_dash(state, player))
-    set_rule_from_string(world, "(R2) Serpent Boss Room Pickup",                    lambda state: can_wall_jump(state, world)               or (can_dash(state, player)                                 and state.can_reach_region("Region 2N", player) and can_press_buttons(state, world, ["R2N Chase 1", "R2N Chase 2"]) and defeated_gilded_serpent(state, player)))
+    if world.options.LogicalWallJumps.value:
+        set_rule_from_string(world, "(R2) Serpent Boss Room Pickup",                lambda state: can_dash(state, player))
+    else:
+        set_rule_from_string(world, "(R2) Serpent Boss Room Pickup",                lambda state: can_dash(state, player)                   and state.can_reach_region("Region 2N", player)             and can_press_buttons(state, world, ["R2N Chase 1", "R2N Chase 2"]) and defeated_gilded_serpent(state, player))
     set_rule_from_string(world, "(R2) Shadow Chase Reward",                         lambda state: can_dash(state, player)                   and has_grapple(state, player)                              and can_press_buttons(state, world, ["R2K Chase 1", "R2K Chase 2", "R2K Chase 3", "R2K Chase 4", "R2K Chase 5"]))
-    set_rule_from_string(world, "(R2S4) Water Room Pickup",                         lambda state: flower_puzzle_completion(state, world) == 3)
+    set_rule_from_string(world, "(R2S4) Water Room Pickup",                         lambda state: state.has("Solve Flower Puzzle", player))
     set_rule_from_string(world, "(R2) George Reward 1",                             lambda state: can_dash(state, player)                   and state.has("Seeds", player, 10))
     set_rule_from_string(world, "(R2) George Reward 2",                             lambda state: can_dash(state, player)                   and state.has("Seeds", player, 10))
     set_rule_from_string(world, "(R2S2) Shadow Chase Pickup",                       lambda state: can_dash(state, player)                   and has_grapple(state, player)                              and can_press_buttons(state, world, ["R2K Chase 1", "R2K Chase 2", "R2K Chase 3", "R2K Chase 4", "R2K Chase 5"]))
@@ -200,7 +265,10 @@ def set_rules(world: "GlyphsWorld"):
     set_rule_from_string(world, "(R3) Silver Shard Puzzle 13 - Black Button",       lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3E Upper", "R3E Puzzle"]))
     set_rule_from_string(world, "(R3) Silver Shard Puzzle 14 - Grapple",            lambda state: can_dash(state, player)                   and has_grapple(state, player))
     set_rule_from_string(world, "(R3) Smile Token Puzzle 2 - Wizard",               lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3E Upper"]))
-    set_rule_from_string(world, "(R3) Smile Token Puzzle 7 - No Dash",              lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3G Right"]) and ((get_button_color(world, "R3G Right") == ButtonColor.GREEN) or can_press_buttons(state, world, ["R3G Left"])))
+    if get_button_color(world, "R3G Right") == ButtonColor.GREEN:
+        set_rule_from_string(world, "(R3) Smile Token Puzzle 7 - No Dash",          lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3G Right"]))
+    else:
+        set_rule_from_string(world, "(R3) Smile Token Puzzle 7 - No Dash",          lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3G Left", "R3G Right"]))
     set_rule_from_string(world, "(R3) Wizard Reward",                               lambda state: collapse_available(state, player)         and can_dash(state, player))
     set_rule_from_string(world, "(R3) Room Below Wizard Pickup",                    lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3E Upper"]))
     set_rule_from_string(world, "(R3) Master Puzzle 3 - Counters",                  lambda state: can_dash_attack(state, player)            and has_grapple(state, player)                      and has_sword(state, player))
@@ -208,9 +276,12 @@ def set_rules(world: "GlyphsWorld"):
 
     # Region 4
     set_rule_from_string(world, "(R4) Spearman Reward",                             lambda state: True)
-    set_rule_from_string(world, "(R4) Multiparry Gold Shard Puzzle",                lambda state: can_dash(state, player)                     and can_press_buttons(state, world, ["R4D Ultra-Multiparry"]) and (get_button_color(world, "R4D Ultra-Multiparry") != ButtonColor.PINK or has_grapple(state, player)))
+    if get_button_color(world, "R4D Ultra-Multiparry") == ButtonColor.PINK:
+        set_rule_from_string(world, "(R4) Multiparry Gold Shard Puzzle",            lambda state: can_dash(state, player)                     and has_grapple(state, player)                    and can_press_buttons(state, world, ["R4D Ultra-Multiparry"]))
+    else:
+        set_rule_from_string(world, "(R4) Multiparry Gold Shard Puzzle",            lambda state: can_dash(state, player)                     and can_press_buttons(state, world, ["R4D Ultra-Multiparry"]))
     set_rule_from_string(world, "(R4) Platforming Gold Shard Room",                 lambda state: can_dash(state, player)                     and has_grapple(state, player)                    and can_parry(state, player) and has_sword(state, player) and can_press_buttons(state, world, ["R4D Platforming 1st", "R4D Platforming 2nd", "R4D Platforming 3rd", "R4D Platforming 4th", "R4D Platforming 5th"]))
-    set_rule_from_string(world, "(R4) Flower Puzzle Reward",                        lambda state: flower_puzzle_completion(state, world) == 3 and can_press_buttons(state, world, ["R4E Save"]))
+    set_rule_from_string(world, "(R4) Flower Puzzle Reward",                        lambda state: state.has("Solve Flower Puzzle", player)    and can_press_buttons(state, world, ["R4E Save"]))
     set_rule_from_string(world, "(R4) Smile Token Puzzle 4 - Multiparry",           lambda state: can_dash(state, player)                     and has_grapple(state, player)                    and can_press_buttons(state, world, ["R4D Multiparry"]))
     set_rule_from_string(world, "(R4) Smile Token Puzzle 5 - Entrance",             lambda state: can_dash(state, player))
     set_rule_from_string(world, "(R4) Rosetta Stone Pickup",                        lambda state: can_dash(state, player))
@@ -236,12 +307,12 @@ def set_rules(world: "GlyphsWorld"):
 
 
     # The Between
-    set_rule_from_string(world, "(Between) Construct Reward",                       lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and can_fight(state, world)                     and can_dash_attack(state, player)                  and has_grapple(state, player)  and can_parry(state, player))
-    set_rule_from_string(world, "(Between) Serpent Reward",                         lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and can_parry(state, player)                  and (state.has("Progressive Essence of George", player, 1)  or state.has("Shroud", player)) and state.has("Silver Shard", player, 9))
-    set_rule_from_string(world, "(Between) Wizard Reward",                          lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and can_parry(state, player)                  and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15) and state.has("Gold Shard", player, 1))
-    set_rule_from_string(world, "(Between) Hot Spring Item",                        lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and can_parry(state, player)                  and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15) and state.has("Gold Shard", player, 1))
-    set_rule_from_string(world, "(Between) Between Reward 1",                       lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and state.has("Progressive Parry", player, 2) and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15) and state.has("Gold Shard", player, 1))
-    set_rule_from_string(world, "(Between) Between Reward 2",                       lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and state.has("Progressive Parry", player, 2) and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15) and state.has("Gold Shard", player, 1))
+    set_rule_from_string(world, "(Between) Construct Reward",                       lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and can_fight(state, world)                     and can_dash_attack(state, player)                  and has_grapple(state, player)  and can_parry(state, player)                    and between_completion(state, world, 7))
+    set_rule_from_string(world, "(Between) Serpent Reward",                         lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and can_parry(state, player)                    and (state.has("Progressive Essence of George", player, 1)  or state.has("Shroud", player)) and state.has("Silver Shard", player, 9)    and between_completion(state, world, 2))
+    set_rule_from_string(world, "(Between) Wizard Reward",                          lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and can_parry(state, player)                    and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15)   and state.has("Gold Shard", player, 1)  and between_completion(state, world, 0))
+    set_rule_from_string(world, "(Between) Hot Spring Item",                        lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and can_parry(state, player)                    and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15)   and state.has("Gold Shard", player, 1)  and between_completion(state, world, 0))
+    set_rule_from_string(world, "(Between) Between Reward 1",                       lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and state.has("Progressive Parry", player, 2)   and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15)   and state.has("Gold Shard", player, 1)  and between_completion(state, world, 0))
+    set_rule_from_string(world, "(Between) Between Reward 2",                       lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and state.has("Progressive Parry", player, 2)   and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15)   and state.has("Gold Shard", player, 1)  and between_completion(state, world, 0))
 
 
     # Act 1
@@ -276,11 +347,17 @@ def set_rules(world: "GlyphsWorld"):
         set_button_rule(world, "R1B 4th Lowest",        lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest"])                                                           and can_dash(state, player))
         set_button_rule(world, "R1B 5th Lowest",        lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest"])                                         and can_dash(state, player))
         set_button_rule(world, "R1B 6th Lowest",        lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 6th Lowest"])                       and can_dash(state, player))
-        set_button_rule(world, "R1B 7th Lowest",        lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 7th Lowest"])                       and (can_wall_jump(state, world) or (can_dash(state, player) and can_press_buttons(state, world, ["R1B 6th Lowest"]))))
-        set_button_rule(world, "R1B Map Room",          lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 7th Lowest", "R1B Map Room"])       and (can_wall_jump(state, world) or (can_dash(state, player) and can_press_buttons(state, world, ["R1B 6th Lowest"]))))
-        set_button_rule(world, "R1B Upper Puzzle",      lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 7th Lowest", "R1B Upper Puzzle"])   and (can_wall_jump(state, world) or (can_dash(state, player) and can_press_buttons(state, world, ["R1B 6th Lowest"]))))
+        if world.options.LogicalWallJumps.value:
+            set_button_rule(world, "R1B 7th Lowest",    lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 7th Lowest"])                       and can_dash(state, player))
+            set_button_rule(world, "R1B Map Room",      lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 7th Lowest", "R1B Map Room"])       and can_dash(state, player))
+            set_button_rule(world, "R1B Upper Puzzle",  lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 7th Lowest", "R1B Upper Puzzle"])   and can_dash(state, player))
+            set_button_rule(world, "R1B Save",          lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 7th Lowest", "R1B Save"])           and can_dash(state, player))
+        else:
+            set_button_rule(world, "R1B 7th Lowest",    lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 6th Lowest", "R1B 7th Lowest"])                     and can_dash(state, player))
+            set_button_rule(world, "R1B Map Room",      lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 6th Lowest", "R1B 7th Lowest", "R1B Map Room"])     and can_dash(state, player))
+            set_button_rule(world, "R1B Upper Puzzle",  lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 6th Lowest", "R1B 7th Lowest", "R1B Upper Puzzle"]) and can_dash(state, player))
+            set_button_rule(world, "R1B Save",          lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 6th Lowest", "R1B 7th Lowest", "R1B Save"])         and can_dash(state, player))
         set_button_rule(world, "R1B Lower Puzzle",      lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B Lower Puzzle"])                                                                           and can_dash(state, player))
-        set_button_rule(world, "R1B Save",              lambda state: can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 7th Lowest", "R1B Save"])           and (can_wall_jump(state, world) or (can_dash(state, player) and can_press_buttons(state, world, ["R1B 6th Lowest"]))))
         set_button_rule(world, "R1C First",             lambda state: can_press_buttons(state, world, ["R1C First"]))
         set_button_rule(world, "R1C Second",            lambda state: can_press_buttons(state, world, ["R1C First", "R1C Second"]))
         set_button_rule(world, "R1E Save",              lambda state: can_press_buttons(state, world, ["R1E Save"]))
@@ -348,13 +425,19 @@ def set_rules(world: "GlyphsWorld"):
         set_button_rule(world, "R2K Chaos Gate Left",   lambda state: can_press_buttons(state, world, ["R2K Chase Hidden", "R2K Chaos Gate Left"])                                                                  and can_dash(state, player) and has_grapple(state, player))
         set_button_rule(world, "R2L Right",             lambda state: can_press_buttons(state, world, ["R2L Right"])                                                                                                and can_dash(state, player))
         set_button_rule(world, "R2L Save",              lambda state: can_press_buttons(state, world, ["R2L Save"]))
-        set_button_rule(world, "R2L Decent Upper Left", lambda state: can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Left", "R2L Decent Upper Right"])                                             and can_dash(state, player) and ((has_sword(state, player) or get_button_color(world, "R2L Decent Upper Right") != ButtonColor.GREEN) or get_button_color(world, "R2L Decent Upper Left") != ButtonColor.GREEN))
+        if get_button_color(world, "R2L Decent Upper Right") != ButtonColor.GREEN or get_button_color(world, "R2L Decent Upper Left") != ButtonColor.GREEN:
+            set_button_rule(world, "R2L Decent Upper Left", lambda state: can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Left", "R2L Decent Upper Right"])                                         and can_dash(state, player))
+            set_button_rule(world, "R2L Decent Upper Middle", lambda state: can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Left", "R2L Decent Upper Right", "R2L Decent Upper Middle"])            and can_dash(state, player))
+            set_button_rule(world, "R2L Decent Middle",     lambda state: can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Left", "R2L Decent Upper Right", "R2L Decent Upper Middle", "R2L Decent Middle"]) and can_dash(state, player))
+            set_button_rule(world, "R2L Decent Lower",      lambda state: can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Left", "R2L Decent Upper Right", "R2L Decent Upper Middle", "R2L Decent Middle", "R2L Decent Lower"]) and can_dash(state, player))
+        else:
+            set_button_rule(world, "R2L Decent Upper Left", lambda state: can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Left", "R2L Decent Upper Right"])                                         and can_dash(state, player) and has_sword(state, player))
+            set_button_rule(world, "R2L Decent Upper Middle", lambda state: can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Left", "R2L Decent Upper Right", "R2L Decent Upper Middle"])            and can_dash(state, player) and has_sword(state, player))
+            set_button_rule(world, "R2L Decent Middle",     lambda state: can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Left", "R2L Decent Upper Right", "R2L Decent Upper Middle", "R2L Decent Middle"]) and can_dash(state, player) and has_sword(state, player))
+            set_button_rule(world, "R2L Decent Lower",      lambda state: can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Left", "R2L Decent Upper Right", "R2L Decent Upper Middle", "R2L Decent Middle", "R2L Decent Lower"]) and can_dash(state, player) and has_sword(state, player))
         set_button_rule(world, "R2L Decent Upper Right", lambda state: can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Right"])                                                                     and can_dash(state, player))
-        set_button_rule(world, "R2L Decent Upper Middle", lambda state: can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Left", "R2L Decent Upper Right", "R2L Decent Upper Middle"])                and can_dash(state, player) and ((has_sword(state, player) or get_button_color(world, "R2L Decent Upper Right") != ButtonColor.GREEN) or get_button_color(world, "R2L Decent Upper Left") != ButtonColor.GREEN))
-        set_button_rule(world, "R2L Decent Middle",     lambda state: can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Left", "R2L Decent Upper Right", "R2L Decent Upper Middle", "R2L Decent Middle"]) and can_dash(state, player) and ((has_sword(state, player) or get_button_color(world, "R2L Decent Upper Right") != ButtonColor.GREEN) or get_button_color(world, "R2L Decent Upper Left") != ButtonColor.GREEN))
-        set_button_rule(world, "R2L Decent Lower",      lambda state: can_press_buttons(state, world, ["R2L Right", "R2L Decent Upper Left", "R2L Decent Upper Right", "R2L Decent Upper Middle", "R2L Decent Middle", "R2L Decent Lower"]) and can_dash(state, player) and ((has_sword(state, player) or get_button_color(world, "R2L Decent Upper Right") != ButtonColor.GREEN) or get_button_color(world, "R2L Decent Upper Left") != ButtonColor.GREEN))
         set_button_rule(world, "R2M Save",              lambda state: can_press_buttons(state, world, ["R2M Save"]))
-        set_button_rule(world, "R2M Water",             lambda state: can_press_buttons(state, world, ["R2M Water"])                                                                                                and flower_puzzle_completion(state, world) == 3)
+        set_button_rule(world, "R2M Water",             lambda state: can_press_buttons(state, world, ["R2M Water"])                                                                                                and state.has("Solve Flower Puzzle", player))
         set_button_rule(world, "R2M Serpent Lock 3",    lambda state: can_press_buttons(state, world, ["R2M Serpent Lock 3"]))
         set_button_rule(world, "R2N Save",              lambda state: can_press_buttons(state, world, ["R2N Save"])                                                                                                 and can_dash(state, player))
         set_button_rule(world, "R2N Chase 1",           lambda state: can_press_buttons(state, world, ["R2N Chase 1"])                                                                                              and can_dash(state, player) and can_fight(state, world))
@@ -393,12 +476,18 @@ def set_rules(world: "GlyphsWorld"):
         set_button_rule(world, "R3F Right",             lambda state: can_press_buttons(state, world, ["R3F Right"])                                                                                                and can_dash(state, player))
         set_button_rule(world, "R3F Save",              lambda state: can_press_buttons(state, world, ["R3F Save"]))
         set_button_rule(world, "R3G Left",              lambda state: can_press_buttons(state, world, ["R3G Left"])                                                                                                 and can_dash(state, player))
-        set_button_rule(world, "R3G Right",             lambda state: can_press_buttons(state, world, ["R3G Right"])                                                                                                and can_dash(state, player) and (get_button_color(world, "R3G Right") == ButtonColor.GREEN or (can_press_buttons(state, world, ["R3G Left"]) and has_grapple(state, player))))
+        if get_button_color(world, "R3G Right") == ButtonColor.GREEN:
+            set_button_rule(world, "R3G Right",         lambda state: can_press_buttons(state, world, ["R3G Right"])                                                                                                and can_dash(state, player))
+        else:
+            set_button_rule(world, "R3G Right",         lambda state: can_press_buttons(state, world, ["R3G Left", "R3G Right"])                                                                                    and can_dash(state, player) and has_grapple(state, player))
         set_button_rule(world, "R3G Save",              lambda state: can_press_buttons(state, world, ["R3G Save"]))
         set_button_rule(world, "R3H Left",              lambda state: can_press_buttons(state, world, ["R3H Left"])                                                                                                 and can_dash(state, player))
         set_button_rule(world, "R3H Middle",            lambda state: can_press_buttons(state, world, ["R3H Middle"])                                                                                               and can_dash(state, player) and has_grapple(state, player))
         set_button_rule(world, "R3H Right",             lambda state: can_press_buttons(state, world, ["R3H Right"])                                                                                                and can_dash(state, player) and has_grapple(state, player))
-        set_button_rule(world, "R3H Gate Left",         lambda state: can_press_buttons(state, world, ["R3H Gate Left"])                                                                                            and can_dash(state, player) and (has_grapple(state, player) or get_button_color(world, "R3H Gate Left") != ButtonColor.PINK))
+        if get_button_color(world, "R3H Gate Left") == ButtonColor.PINK:
+            set_button_rule(world, "R3H Gate Left",     lambda state: can_press_buttons(state, world, ["R3H Gate Left"])                                                                                            and can_dash(state, player) and has_grapple(state, player))
+        else:
+            set_button_rule(world, "R3H Gate Left",     lambda state: can_press_buttons(state, world, ["R3H Gate Left"])                                                                                            and can_dash(state, player))
         set_button_rule(world, "R3H Save",              lambda state: can_press_buttons(state, world, ["R3H Save"]))
         set_button_rule(world, "R3I Challenge 1",       lambda state: can_press_buttons(state, world, ["R3I Challenge 1"])                                                                                          and can_dash(state, player))
         set_button_rule(world, "R3I Challenge 2",       lambda state: can_press_buttons(state, world, ["R3I Challenge 1", "R3I Challenge 2"])                                                                       and can_dash(state, player) and has_grapple(state, player))
@@ -412,6 +501,8 @@ def set_rules(world: "GlyphsWorld"):
         set_button_rule(world, "R4C 1st",               lambda state: can_press_buttons(state, world, ["R4C 1st"])                                                                                                  and can_dash(state, player))
         set_button_rule(world, "R4C 2nd",               lambda state: can_press_buttons(state, world, ["R4C 1st", "R4C 2nd"])                                                                                       and can_dash(state, player) and has_grapple(state, player))
         set_button_rule(world, "R4C 3rd",               lambda state: can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 3rd"])                                                                            and can_dash(state, player) and has_grapple(state, player))
+
+        # Gonna leave these rules alone for now since optimizing based on button color results will make it all really sloppy
         set_button_rule(world, "R4C 4th",               lambda state: can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 4th"])                                                                            and can_dash(state, player) and has_grapple(state, player) and (get_button_color(world, "R4C 4th") != ButtonColor.PINK or can_press_buttons(state, world, ["R4C 3rd"])))
         set_button_rule(world, "R4C 5th",               lambda state: can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 4th", "R4C 5th"])                                                                 and can_dash(state, player) and has_grapple(state, player) and (get_button_color(world, "R4C 4th") != ButtonColor.PINK or can_press_buttons(state, world, ["R4C 3rd"])) and ((get_button_color(world, "R4C 5th") == ButtonColor.GREEN and has_sword(state, player)) or can_press_buttons(state, world, ["R4C 6th"])))
         set_button_rule(world, "R4C 6th",               lambda state: can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 4th"])                                                                            and can_dash(state, player) and has_grapple(state, player) and (get_button_color(world, "R4C 4th") != ButtonColor.PINK or can_press_buttons(state, world, ["R4C 3rd"])))
@@ -425,18 +516,25 @@ def set_rules(world: "GlyphsWorld"):
         set_button_rule(world, "R4C 5 Parry 4",         lambda state: can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 4th", "R4C 5th", "R4C 7th", "R4C 8th", "R4C 9th", "R4C 5 Parry 4"])               and can_dash(state, player) and has_grapple(state, player) and (get_button_color(world, "R4C 4th") != ButtonColor.PINK or can_press_buttons(state, world, ["R4C 3rd"])) and ((get_button_color(world, "R4C 5th") == ButtonColor.GREEN and has_sword(state, player)) or can_press_buttons(state, world, ["R4C 6th"])) and (get_button_color(world, "R4C 9th") != ButtonColor.PINK or can_press_buttons(state, world, ["R4C 10th"])))
         set_button_rule(world, "R4C 5 Parry 5",         lambda state: can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 4th", "R4C 5th", "R4C 7th", "R4C 8th", "R4C 9th", "R4C 5 Parry 5"])               and can_dash(state, player) and has_grapple(state, player) and (get_button_color(world, "R4C 4th") != ButtonColor.PINK or can_press_buttons(state, world, ["R4C 3rd"])) and ((get_button_color(world, "R4C 5th") == ButtonColor.GREEN and has_sword(state, player)) or can_press_buttons(state, world, ["R4C 6th"])) and (get_button_color(world, "R4C 9th") != ButtonColor.PINK or can_press_buttons(state, world, ["R4C 10th"])))
         set_button_rule(world, "R4C Gate Right",        lambda state: can_press_buttons(state, world, ["R4C 1st", "R4C 2nd", "R4C 4th", "R4C 5th", "R4C 7th", "R4C 8th", "R4C 9th", "R4C Gate Right"])              and can_dash(state, player) and has_grapple(state, player) and (get_button_color(world, "R4C 4th") != ButtonColor.PINK or can_press_buttons(state, world, ["R4C 3rd"])) and ((get_button_color(world, "R4C 5th") == ButtonColor.GREEN and has_sword(state, player)) or can_press_buttons(state, world, ["R4C 6th"])) and (get_button_color(world, "R4C 9th") != ButtonColor.PINK or can_press_buttons(state, world, ["R4C 10th"])))
+
         set_button_rule(world, "R4D Platforming 1st",   lambda state: can_press_buttons(state, world, ["R4D Platforming 1st"])                                                                                      and can_dash(state, player) and has_grapple(state, player) and has_sword(state, player))
         set_button_rule(world, "R4D Platforming 2nd",   lambda state: can_press_buttons(state, world, ["R4D Platforming 1st", "R4D Platforming 2nd"])                                                               and can_dash(state, player) and has_grapple(state, player) and has_sword(state, player))
         set_button_rule(world, "R4D Platforming 3rd",   lambda state: can_press_buttons(state, world, ["R4D Platforming 1st", "R4D Platforming 2nd", "R4D Platforming 3rd"])                                        and can_dash(state, player) and has_grapple(state, player) and has_sword(state, player))
         set_button_rule(world, "R4D Platforming 4th",   lambda state: can_press_buttons(state, world, ["R4D Platforming 1st", "R4D Platforming 2nd", "R4D Platforming 3rd", "R4D Platforming 4th"])                 and can_dash(state, player) and has_grapple(state, player) and has_sword(state, player))
         set_button_rule(world, "R4D Platforming 5th",   lambda state: can_press_buttons(state, world, ["R4D Platforming 1st", "R4D Platforming 2nd", "R4D Platforming 3rd", "R4D Platforming 4th", "R4D Platforming 5th"]) and can_dash(state, player) and has_grapple(state, player) and has_sword(state, player) and can_parry(state, player))
         set_button_rule(world, "R4D Multiparry",        lambda state: can_press_buttons(state, world, ["R4D Multiparry"])                                                                                           and can_dash(state, player) and has_grapple(state, player))
-        set_button_rule(world, "R4D Ultra-Multiparry",  lambda state: can_press_buttons(state, world, ["R4D Ultra-Multiparry"])                                                                                     and can_dash(state, player) and (get_button_color(world, "R4D Ultra-Multiparry") != ButtonColor.PINK or has_grapple(state, player)))
+        if get_button_color(world, "R4D Ultra-Multiparry") == ButtonColor.PINK:
+            set_button_rule(world, "R4D Ultra-Multiparry", lambda state: can_press_buttons(state, world, ["R4D Ultra-Multiparry"])                                                                                  and can_dash(state, player) and has_grapple(state, player))
+        else:
+            set_button_rule(world, "R4D Ultra-Multiparry", lambda state: can_press_buttons(state, world, ["R4D Ultra-Multiparry"])                                                                                  and can_dash(state, player))
         set_button_rule(world, "R4D Main Route 1st",    lambda state: can_press_buttons(state, world, ["R4D Main Route 1st"])                                                                                       and can_dash(state, player))
         set_button_rule(world, "R4D Main Route 2nd",    lambda state: can_press_buttons(state, world, ["R4D Main Route 1st", "R4D Main Route 2nd", "R4D Main Route 3rd"])                                           and can_dash(state, player) and has_grapple(state, player) and can_parry(state, player))
         set_button_rule(world, "R4D Main Route 3rd",    lambda state: can_press_buttons(state, world, ["R4D Main Route 1st", "R4D Main Route 3rd"])                                                                 and can_dash(state, player) and has_grapple(state, player) and can_parry(state, player))
         set_button_rule(world, "R4D Main Route 4th",    lambda state: can_press_buttons(state, world, ["R4D Main Route 1st", "R4D Main Route 2nd", "R4D Main Route 3rd", "R4D Main Route 4th"])                     and can_dash(state, player) and has_grapple(state, player) and can_parry(state, player))
-        set_button_rule(world, "R4D Main Route 5th",    lambda state: can_press_buttons(state, world, ["R4D Main Route 1st", "R4D Main Route 2nd", "R4D Main Route 3rd", "R4D Main Route 4th", "R4D Main Route 5th"]) and can_dash(state, player) and has_grapple(state, player) and can_parry(state, player) and ((get_button_color(world, "R4D Main Route 5th") == ButtonColor.GREEN and has_sword(state, player)) or can_press_buttons(state, world, ["R4D Main Route 6th"])))
+        if get_button_color(world, "R4D Main Route 5th") == ButtonColor.GREEN:
+            set_button_rule(world, "R4D Main Route 5th", lambda state: can_press_buttons(state, world, ["R4D Main Route 1st", "R4D Main Route 2nd", "R4D Main Route 3rd", "R4D Main Route 4th", "R4D Main Route 5th"]) and can_dash(state, player) and has_grapple(state, player) and can_parry(state, player) and (has_sword(state, player) or can_press_buttons(state, world, ["R4D Main Route 6th"])))
+        else:
+            set_button_rule(world, "R4D Main Route 5th", lambda state: can_press_buttons(state, world, ["R4D Main Route 1st", "R4D Main Route 2nd", "R4D Main Route 3rd", "R4D Main Route 4th", "R4D Main Route 5th", "R4D Main Route 6th"]) and can_dash(state, player) and has_grapple(state, player) and can_parry(state, player))
         set_button_rule(world, "R4D Main Route 6th",    lambda state: can_press_buttons(state, world, ["R4D Main Route 1st", "R4D Main Route 2nd", "R4D Main Route 3rd", "R4D Main Route 4th", "R4D Main Route 6th"]) and can_dash(state, player) and has_grapple(state, player) and can_parry(state, player))
         set_button_rule(world, "R4D Main Route 7th",    lambda state: can_press_buttons(state, world, ["R4D Main Route 1st", "R4D Main Route 2nd", "R4D Main Route 3rd", "R4D Main Route 4th", "R4D Main Route 7th"]) and can_dash(state, player) and has_grapple(state, player) and can_parry(state, player))
         set_button_rule(world, "R4D Save",              lambda state: can_press_buttons(state, world, ["R4D Save"]))
@@ -449,7 +547,10 @@ def set_rules(world: "GlyphsWorld"):
         set_button_rule(world, "R4G 4th",               lambda state: can_press_buttons(state, world, ["R4G 3rd", "R4G 4th"])                                                                                       and can_dash(state, player) and has_grapple(state, player) and can_parry(state, player))
         set_button_rule(world, "R4G 5th",               lambda state: can_press_buttons(state, world, ["R4G 1st", "R4G 2nd", "R4G 3rd", "R4G 4th", "R4G 5th"])                                                      and can_dash(state, player) and has_grapple(state, player) and can_parry(state, player))
         set_button_rule(world, "R4G 6th",               lambda state: can_press_buttons(state, world, ["R4G 1st", "R4G 2nd", "R4G 3rd", "R4G 4th", "R4G 5th", "R4G 6th"])                                           and can_dash(state, player) and has_grapple(state, player) and can_parry(state, player))
-        set_button_rule(world, "R4H Middle",            lambda state: can_press_buttons(state, world, ["R4H Middle"])                                                                                               and can_dash(state, player) and (get_button_color(world, "R4H Middle") != ButtonColor.PINK or has_grapple(state, player)))
+        if get_button_color(world, "R4H Middle") == ButtonColor.PINK:
+            set_button_rule(world, "R4H Middle",        lambda state: can_press_buttons(state, world, ["R4H Middle"])                                                                                               and can_dash(state, player) and has_grapple(state, player))
+        else:
+            set_button_rule(world, "R4H Middle",        lambda state: can_press_buttons(state, world, ["R4H Middle"])                                                                                               and can_dash(state, player))
         set_button_rule(world, "R4H Save",              lambda state: can_press_buttons(state, world, ["R4H Save"]))
         set_button_rule(world, "R4I Left",              lambda state: can_press_buttons(state, world, ["R4I Left"])                                                                                                 and can_dash(state, player))
         set_button_rule(world, "R4I Right",             lambda state: can_press_buttons(state, world, ["R4I Right"])                                                                                                and can_dash(state, player))

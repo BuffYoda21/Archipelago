@@ -217,24 +217,28 @@ def can_solve_flower_puzzle(state: CollectionState, player: int) -> bool:
     """
     return can_start_flower_puzzle(state, player) and defeated_gilded_serpent(state, player) and can_dash(state, player) and can_press_green_buttons(state, player) and has_grapple(state, player)
 
-def flower_puzzle_completion(state: CollectionState, world: "GlyphsWorld") -> int:
+def flower_puzzle_completion(state: CollectionState, world: "GlyphsWorld", target: int=3) -> bool:
     """
     If used in an entrance access rule, wrap with `multiworld.register_indirect_condition(world.get_region("Region 1E"), <foo>)`.
     """
     player = world.player
     completion = 0
     wall_jump = can_wall_jump(state, world)
+    if target <= 0:
+        return True
     if state.can_reach_region("Region 1E", player) and can_dash(state, player) and can_press_buttons(state, world, ["R1B 4th Lowest", "R1B 5th Lowest"]) and (wall_jump or can_press_buttons(state, world, ["R1B 6th Lowest"])):
         completion += 1
+        if completion >= target:
+            return True
     else:
-        return completion
+        return False
     if can_press_buttons(state, world, ["R1B Map Room", "R2A Gate Left", "R2A Upper", "R2G Lower", "R2G Middle", "R2G Moving Platform", "R2N Chase 1"]) and (wall_jump or can_press_buttons(state, world, ["R1F Right"])) and (can_parry(state, player) or (get_button_color(world, "R2G Upper Middle") != ButtonColor.BLACK and can_press_buttons(state, world, ["R2G Upper Left", "R2G Upper Middle"]))):
         completion += 1
+        if completion >= target:
+            return True
     else:
-        return completion
-    if defeated_gilded_serpent(state, player) and has_grapple(state, player) and can_press_buttons(state, world, ["R2P Left"]):
-        completion += 1
-    return completion
+        return False
+    return defeated_gilded_serpent(state, player) and has_grapple(state, player) and can_press_buttons(state, world, ["R2P Left"])
 
 def can_access_all_silver_shards_old(state: CollectionState, player: int) -> bool:
     """
