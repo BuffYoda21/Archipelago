@@ -159,184 +159,184 @@ def set_rules(world: "GlyphsWorld"):
     # ---------------------------------------------location_name------------------------------------------------conditions---------------------------------------------------------
 
     # Event Locations
-    set_rule_from_string(world, "Defeat Runic Construct",                           lambda state: can_fight(state, world))
-    set_rule_from_string(world, "Stalker Sigil 1",                                  lambda state: stalker_sigils_present(state, player))
+    construct_rule(world, "Defeat Runic Construct",                             lambda state: can_fight(state, world))
+    construct_rule(world, "Stalker Sigil 1",                                    lambda state: stalker_sigils_present(state, player))
     if world.options.LogicalWallJumps.value:
-        set_rule_from_string(world, "Serpent Lock 1",                               lambda state: can_dash(state, player)                       and can_press_buttons(state, world, ["R2E Lower", "R2E Serpent Lock 1"]))
+        construct_rule(world, "Serpent Lock 1",                                 lambda state: can_dash(state, player)                       and can_press_buttons(state, world, ["R2E Lower", "R2E Serpent Lock 1"]))
     else:
-        set_rule_from_string(world, "Serpent Lock 1",                               lambda state: can_dash(state, player)                       and can_press_buttons(state, world, ["R2E Lower", "R2E Upper", "R2E Serpent Lock 1"]))
-    set_rule_from_string(world, "Serpent Lock 2",                                   lambda state: can_dash(state, player)                       and can_press_buttons(state, world, ["R2H Serpent Lock 2"]))
-    set_rule_from_string(world, "Serpent Lock 3",                                   lambda state: can_press_buttons(state, world, ["R2M Serpent Lock 3"]))
-    set_rule_from_string(world, "Defeat Gilded Serpent",                            lambda state: can_dash(state, player)                       and can_fight(state, world)                 and can_press_buttons(state, world, ["R2N Chase 1"]))
-    set_rule_from_string(world, "Stalker Sigil 2",                                  lambda state: stalker_sigils_present(state, player))
-    set_rule_from_string(world, "Stalker Sigil 3",                                  lambda state: stalker_sigils_present(state, player))
-    set_rule_from_string(world, "Solve Flower Puzzle",                              lambda state: flower_puzzle_completion(state, world, 3))
-    set_rule_from_string(world, "Collapse Unlock",                                  lambda state: can_dash(state, player)                       and wizard_fight_available(state, world)    and can_fight(state, world)                                 and has_grapple(state, player)  and can_press_buttons(state, world, ["R3E Upper"]))
-    set_rule_from_string(world, "Wizard True Defeat",                               lambda state: can_dash_attack(state, player)                and wizard_fight_available(state, world)    and can_fight(state, world)                                 and has_grapple(state, player)  and can_press_buttons(state, world, ["R3E Upper"]))
-    set_rule_from_string(world, "Defeat Spearman",                                  lambda state: can_dash_attack(state, player)                and can_fight(state, world))
-    set_rule_from_string(world, "Good Ending",                                      lambda state: can_fight(state, world)                       and can_dash_attack(state, player)          and can_parry(state, player)                                and wraith_fight_available(state, world)                  and state.has("Gold Shard", player, 3))
-    set_rule_from_string(world, "Last Fracture",                                    lambda state: has_clarity(state, player)                    and wraith_fight_available(state, world)    and state.has("Good Ending", player))
-    set_rule_from_string(world, "False Ending",                                     lambda state: can_dash(state, player)                       and has_grapple(state, player)              and can_press_buttons(state, world, ["R2A Gate Right"])     and state.can_reach_region("Region 2B", player)) # need to check for this specific region because if one specific screen has not been reached then the collapse is impossible
-    set_rule_from_string(world, "Smilemask Ending",                                 lambda state: state.has("Smile Token", player, 10))
-    set_rule_from_string(world, "Defeat Null",                                      lambda state: can_dash_attack(state, player)                and has_grapple(state, player)              and can_press_buttons(state, world, ["Dark 1", "Dark 2", "Dark 3", "Dark 4", "Dark 5", "Dark 6", "Dark Save"]))
-    set_rule_from_string(world, "Clarity",                                          lambda state: state.has("Rune Cube", player, 3))
-    set_rule_from_string(world, "Perfect Clarity",                                  lambda state: state.has("Rune Cube", player, 3)             and (state.has("Shroud", player)            or state.has("Progressive Essence of George", player)))
-    set_rule_from_string(world, "Omnipotence Ending",                               lambda state: can_dash(state, player)                       and void_gate_open(state, player))
-    set_rule_from_string(world, "Clear Act 1",                                      lambda state: void_gate_open(state, player)                 and can_dash(state, player)                 and has_grapple(state, player)                              and state.has("Shroud", player) and can_press_buttons(state, world, ["Void Chase 1", "Void Chase 2", "Void Chase 3", "Void Chase 4", "Void Chase Gate"]))
-    set_rule_from_string(world, "Clear Act 2",                                      lambda state: has_sword(state, player)                      and can_dash_attack(state, player)          and (state.has("Shroud", player)                            or state.has("Progressive Essence of George", player, 1))  and can_parry(state, player) and state.has("Gold Shard", player, 1))
-    set_rule_from_string(world, "True Ending",                                      lambda state: can_fight(state, world)                       and can_parry(state, player)                and (state.has("Shroud", player)                            or state.has("Progressive Essence of George", player, 1))  and state.has("Gold Shard", player, 3))
-    set_rule_from_string(world, "Epilogue Ending",                                  lambda state: can_dash(state, player)                       and state.has("Shroud", player)             and state.has("Progressive Essence of George", player, 1)   and state.has("Silver Shard", player, 15))
+        construct_rule(world, "Serpent Lock 1",                                 lambda state: can_dash(state, player)                       and can_press_buttons(state, world, ["R2E Lower", "R2E Upper", "R2E Serpent Lock 1"]))
+    construct_rule(world, "Serpent Lock 2",                                     lambda state: can_dash(state, player)                       and can_press_buttons(state, world, ["R2H Serpent Lock 2"]))
+    construct_rule(world, "Serpent Lock 3",                                     lambda state: can_press_buttons(state, world, ["R2M Serpent Lock 3"]))
+    construct_rule(world, "Defeat Gilded Serpent",                              lambda state: can_dash(state, player)                       and can_fight(state, world)                 and can_press_buttons(state, world, ["R2N Chase 1"]))
+    construct_rule(world, "Stalker Sigil 2",                                    lambda state: stalker_sigils_present(state, player))
+    construct_rule(world, "Stalker Sigil 3",                                    lambda state: stalker_sigils_present(state, player))
+    construct_rule(world, "Solve Flower Puzzle",                                lambda state: flower_puzzle_completion(state, world, 3))
+    construct_rule(world, "Collapse Unlock",                                    lambda state: can_dash(state, player)                       and wizard_fight_available(state, world)    and can_fight(state, world)                                 and has_grapple(state, player)  and can_press_buttons(state, world, ["R3E Upper"]))
+    construct_rule(world, "Wizard True Defeat",                                 lambda state: can_dash_attack(state, player)                and wizard_fight_available(state, world)    and can_fight(state, world)                                 and has_grapple(state, player)  and can_press_buttons(state, world, ["R3E Upper"]))
+    construct_rule(world, "Defeat Spearman",                                    lambda state: can_dash_attack(state, player)                and can_fight(state, world))
+    construct_rule(world, "Good Ending",                                        lambda state: can_fight(state, world)                       and can_dash_attack(state, player)          and can_parry(state, player)                                and wraith_fight_available(state, world)                  and state.has("Gold Shard", player, 3))
+    construct_rule(world, "Last Fracture",                                      lambda state: has_clarity(state, player)                    and wraith_fight_available(state, world)    and state.has("Good Ending", player))
+    construct_rule(world, "False Ending",                                       lambda state: can_dash(state, player)                       and has_grapple(state, player)              and can_press_buttons(state, world, ["R2A Gate Right"])     and state.can_reach_region("Region 2B", player)) # need to check for this specific region because if one specific screen has not been reached then the collapse is impossible
+    construct_rule(world, "Smilemask Ending",                                   lambda state: state.has("Smile Token", player, 10))
+    construct_rule(world, "Defeat Null",                                        lambda state: can_dash_attack(state, player)                and has_grapple(state, player)              and can_press_buttons(state, world, ["Dark 1", "Dark 2", "Dark 3", "Dark 4", "Dark 5", "Dark 6", "Dark Save"]))
+    construct_rule(world, "Clarity",                                            lambda state: state.has("Rune Cube", player, 3))
+    construct_rule(world, "Perfect Clarity",                                    lambda state: state.has("Rune Cube", player, 3)             and (state.has("Shroud", player)            or state.has("Progressive Essence of George", player)))
+    construct_rule(world, "Omnipotence Ending",                                 lambda state: can_dash(state, player)                       and void_gate_open(state, player))
+    construct_rule(world, "Clear Act 1",                                        lambda state: void_gate_open(state, player)                 and can_dash(state, player)                 and has_grapple(state, player)                              and state.has("Shroud", player) and can_press_buttons(state, world, ["Void Chase 1", "Void Chase 2", "Void Chase 3", "Void Chase 4", "Void Chase Gate"]))
+    construct_rule(world, "Clear Act 2",                                        lambda state: has_sword(state, player)                      and can_dash_attack(state, player)          and (state.has("Shroud", player)                            or state.has("Progressive Essence of George", player, 1))  and can_parry(state, player) and state.has("Gold Shard", player, 1))
+    construct_rule(world, "True Ending",                                        lambda state: can_fight(state, world)                       and can_parry(state, player)                and (state.has("Shroud", player)                            or state.has("Progressive Essence of George", player, 1))  and state.has("Gold Shard", player, 3))
+    construct_rule(world, "Epilogue Ending",                                    lambda state: can_dash(state, player)                       and state.has("Shroud", player)             and state.has("Progressive Essence of George", player, 1)   and state.has("Silver Shard", player, 15))
 
     # Region 1
-    set_rule_from_string(world, "(R1) Starting Item",                               lambda state: True)
-    set_rule_from_string(world, "(R1) Sword Pedestal",                              lambda state: True)
-    set_rule_from_string(world, "(R1) Runic Construct Reward",                      lambda state: defeated_runic_construct(state, player))
-    set_rule_from_string(world, "(R1) Map Pedestal",                                lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B Map Room"]))
+    construct_rule(world, "(R1) Starting Item",                                 lambda state: True)
+    construct_rule(world, "(R1) Sword Pedestal",                                lambda state: True)
+    construct_rule(world, "(R1) Runic Construct Reward",                        lambda state: defeated_runic_construct(state, player))
+    construct_rule(world, "(R1) Map Pedestal",                                  lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B Map Room"]))
     if world.options.LogicalWallJumps.value:
         if get_button_color(world, "R1B Upper Puzzle") == ButtonColor.BLACK:
-            set_rule_from_string(world, "(R1) Silver Shard Puzzle 1 - Map",         lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B 4th Lowest", "R1B 5th Lowest", "R1B Upper Puzzle"]))
+            construct_rule(world, "(R1) Silver Shard Puzzle 1 - Map",           lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B 4th Lowest", "R1B 5th Lowest", "R1B Upper Puzzle"]))
         else:
-            set_rule_from_string(world, "(R1) Silver Shard Puzzle 1 - Map",         lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B 4th Lowest", "R1B 5th Lowest", "R1B Upper Puzzle", "R1B Save"]))
+            construct_rule(world, "(R1) Silver Shard Puzzle 1 - Map",           lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B 4th Lowest", "R1B 5th Lowest", "R1B Upper Puzzle", "R1B Save"]))
     else:
         if get_button_color(world, "R1B Upper Puzzle") == ButtonColor.BLACK:
-            set_rule_from_string(world, "(R1) Silver Shard Puzzle 1 - Map",         lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 6th Lowest", "R1B Upper Puzzle"]))
+            construct_rule(world, "(R1) Silver Shard Puzzle 1 - Map",           lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 6th Lowest", "R1B Upper Puzzle"]))
         else:
-            set_rule_from_string(world, "(R1) Silver Shard Puzzle 1 - Map",         lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 6th Lowest", "R1B Upper Puzzle", "R1B Save"]))
-    set_rule_from_string(world, "(R1) Silver Shard Puzzle 2 - Grapple",             lambda state: can_dash(state, player)                   and has_grapple(state, player))
-    set_rule_from_string(world, "(R1) Silver Shard Puzzle 3 - Spike Tunnel",        lambda state: can_dash(state, player))
-    set_rule_from_string(world, "(R1) Smile Token Puzzle 1 - Hidden Bounce Pad",    lambda state: can_dash(state, player)                   and has_grapple(state, player))
+            construct_rule(world, "(R1) Silver Shard Puzzle 1 - Map",           lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 4th Lowest", "R1B 5th Lowest", "R1B 6th Lowest", "R1B Upper Puzzle", "R1B Save"]))
+    construct_rule(world, "(R1) Silver Shard Puzzle 2 - Grapple",               lambda state: can_dash(state, player)                   and has_grapple(state, player))
+    construct_rule(world, "(R1) Silver Shard Puzzle 3 - Spike Tunnel",          lambda state: can_dash(state, player))
+    construct_rule(world, "(R1) Smile Token Puzzle 1 - Hidden Bounce Pad",      lambda state: can_dash(state, player)                   and has_grapple(state, player))
     if world.options.LogicalWallJumps.value:
-        set_rule_from_string(world, "(R1) Smile Token Puzzle 9 - Moving Platforms", lambda state: can_dash(state, player))
+        construct_rule(world, "(R1) Smile Token Puzzle 9 - Moving Platforms",   lambda state: can_dash(state, player))
     else:
-        set_rule_from_string(world, "(R1) Smile Token Puzzle 9 - Moving Platforms", lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B Lower Puzzle", "R1B Lowest"]))
-    set_rule_from_string(world, "(R1) Color Cypher Room Pickup",                    lambda state: True)
-    set_rule_from_string(world, "(R1) Master Puzzle 2 - Silence",                   lambda state: can_dash(state, player)                   and has_grapple(state, player))
+        construct_rule(world, "(R1) Smile Token Puzzle 9 - Moving Platforms",   lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R1B Lower Puzzle", "R1B Lowest"]))
+    construct_rule(world, "(R1) Color Cypher Room Pickup",                      lambda state: True)
+    construct_rule(world, "(R1) Master Puzzle 2 - Silence",                     lambda state: can_dash(state, player)                   and has_grapple(state, player))
 
 
     # Region 2
-    set_rule_from_string(world, "(R2S1) Silver Shard Puzzle 4 - Save Button",       lambda state: can_press_buttons(state, world, ["R2D Save"]))
-    set_rule_from_string(world, "(R2) Silver Shard Puzzle 5 - Respawn",             lambda state: can_dash(state, player)                   and state.can_reach_region("Region 2B", player)) # change this to being able to access certain save buttons one save button sanity is implemented
-    set_rule_from_string(world, "(R2) Silver Shard Puzzle 6 - Invisible",           lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R2B Puzzle"]))
+    construct_rule(world, "(R2S1) Silver Shard Puzzle 4 - Save Button",         lambda state: can_press_buttons(state, world, ["R2D Save"]))
+    construct_rule(world, "(R2) Silver Shard Puzzle 5 - Respawn",               lambda state: can_dash(state, player)                   and state.can_reach_region("Region 2B", player)) # change this to being able to access certain save buttons one save button sanity is implemented
+    construct_rule(world, "(R2) Silver Shard Puzzle 6 - Invisible",             lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R2B Puzzle"]))
     if get_button_color(world, "R2G Upper Middle") == ButtonColor.BLACK:
-        set_rule_from_string(world, "(R2S2) Silver Shard Puzzle 7 - Timed",         lambda state: can_dash(state, player)                   and can_parry(state, player) and can_press_buttons(state, world, ["R2G Middle", "R2G Moving Platform"]))
+        construct_rule(world, "(R2S2) Silver Shard Puzzle 7 - Timed",           lambda state: can_dash(state, player)                   and can_parry(state, player) and can_press_buttons(state, world, ["R2G Middle", "R2G Moving Platform"]))
     else:
-        set_rule_from_string(world, "(R2S2) Silver Shard Puzzle 7 - Timed",         lambda state: can_dash(state, player)                   and (can_parry(state, player) or can_press_buttons(state, world, ["R2G Upper Left", "R2G Upper Middle"])) and can_press_buttons(state, world, ["R2G Middle", "R2G Moving Platform"]))
-    set_rule_from_string(world, "(R2) Silver Shard Puzzle 8 - Avoid Respawn",       lambda state: can_dash(state, player)                   and has_grapple(state, player) and can_press_buttons(state, world, ["R2P Puzzle"]))
+        construct_rule(world, "(R2S2) Silver Shard Puzzle 7 - Timed",           lambda state: can_dash(state, player)                   and (can_parry(state, player) or can_press_buttons(state, world, ["R2G Upper Left", "R2G Upper Middle"])) and can_press_buttons(state, world, ["R2G Middle", "R2G Moving Platform"]))
+    construct_rule(world, "(R2) Silver Shard Puzzle 8 - Avoid Respawn",         lambda state: can_dash(state, player)                   and has_grapple(state, player) and can_press_buttons(state, world, ["R2P Puzzle"]))
     if world.options.DashPuzzlesSolved.value:
-        set_rule_from_string(world, "(R2) Silver Shard Puzzle 9 - Color Dash Puzzle", lambda state: can_dash(state, player))
+        construct_rule(world, "(R2) Silver Shard Puzzle 9 - Color Dash Puzzle", lambda state: can_dash(state, player))
     else:
-        set_rule_from_string(world, "(R2) Silver Shard Puzzle 9 - Color Dash Puzzle", lambda state: can_dash(state, player)                 and state.can_reach_region("Region 1A", player))
-    set_rule_from_string(world, "(R2) Silver Shard Puzzle 15 - Escape Serpent",     lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R2N Chase 1"])        and (defeated_gilded_serpent(state, player) or can_fight(state, world)))
-    set_rule_from_string(world, "(R2S2) Smile Token Puzzle 3 - Car Hall",           lambda state: can_dash(state, player))
-    set_rule_from_string(world, "(R2) Smile Token Puzzle 6 - Above Serpent",        lambda state: can_dash(state, player)                   and defeated_gilded_serpent(state, player)                  and can_press_buttons(state, world, ["R2N Save"]))
-    set_rule_from_string(world, "(R2S1) Smile Token Puzzle 8 - Erosion",            lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R2E Lower"]))
-    set_rule_from_string(world, "(R2S2) Smile Token Puzzle 10 - Chaos",             lambda state: can_dash(state, player)                   and has_grapple(state, player)                              and can_press_buttons(state, world, ["R2K Chase Hidden", "R2K Chaos Upper 1", "R2K Chaos Upper 2", "R2K Chaos Upper 3", "R2K Chaos Upper 4", "R2K Chaos Middle 1", "R2K Chaos Middle 2", "R2K Chaos Middle 5", "R2K Chaos Lower 6", "R2K Chaos Pivot 1", "R2K Chaos Pivot 2", "R2K Chaos Sliding Platform", "R2K Chaos Gate Left"]))
-    set_rule_from_string(world, "(R2) Gilded Serpent Reward",                       lambda state: True)
-    set_rule_from_string(world, "(R2S1) Cameo Room Pickup",                         lambda state: can_dash(state, player))
-    set_rule_from_string(world, "(R2S2) Car Hall Pickup",                           lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R2H Save"]))
-    set_rule_from_string(world, "(R2S1) Near Shooters Pickup",                      lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R2E Lower"]))
-    set_rule_from_string(world, "(R2S3) Collapsed Tunnel Pickup",                   lambda state: True)
-    set_rule_from_string(world, "(R2) Nest Room Pickup",                            lambda state: can_dash(state, player))
+        construct_rule(world, "(R2) Silver Shard Puzzle 9 - Color Dash Puzzle", lambda state: can_dash(state, player)                   and state.can_reach_region("Region 1A", player))
+    construct_rule(world, "(R2) Silver Shard Puzzle 15 - Escape Serpent",       lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R2N Chase 1"])        and (defeated_gilded_serpent(state, player) or can_fight(state, world)))
+    construct_rule(world, "(R2S2) Smile Token Puzzle 3 - Car Hall",             lambda state: can_dash(state, player))
+    construct_rule(world, "(R2) Smile Token Puzzle 6 - Above Serpent",          lambda state: can_dash(state, player)                   and defeated_gilded_serpent(state, player)                  and can_press_buttons(state, world, ["R2N Save"]))
+    construct_rule(world, "(R2S1) Smile Token Puzzle 8 - Erosion",              lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R2E Lower"]))
+    construct_rule(world, "(R2S2) Smile Token Puzzle 10 - Chaos",               lambda state: can_dash(state, player)                   and has_grapple(state, player)                              and can_press_buttons(state, world, ["R2K Chase Hidden", "R2K Chaos Upper 1", "R2K Chaos Upper 2", "R2K Chaos Upper 3", "R2K Chaos Upper 4", "R2K Chaos Middle 1", "R2K Chaos Middle 2", "R2K Chaos Middle 5", "R2K Chaos Lower 6", "R2K Chaos Pivot 1", "R2K Chaos Pivot 2", "R2K Chaos Sliding Platform", "R2K Chaos Gate Left"]))
+    construct_rule(world, "(R2) Gilded Serpent Reward",                         lambda state: True)
+    construct_rule(world, "(R2S1) Cameo Room Pickup",                           lambda state: can_dash(state, player))
+    construct_rule(world, "(R2S2) Car Hall Pickup",                             lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R2H Save"]))
+    construct_rule(world, "(R2S1) Near Shooters Pickup",                        lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R2E Lower"]))
+    construct_rule(world, "(R2S3) Collapsed Tunnel Pickup",                     lambda state: True)
+    construct_rule(world, "(R2) Nest Room Pickup",                              lambda state: can_dash(state, player))
     if world.options.LogicalWallJumps.value:
-        set_rule_from_string(world, "(R2) Serpent Boss Room Pickup",                lambda state: can_dash(state, player))
+        construct_rule(world, "(R2) Serpent Boss Room Pickup",                  lambda state: can_dash(state, player))
     else:
-        set_rule_from_string(world, "(R2) Serpent Boss Room Pickup",                lambda state: can_dash(state, player)                   and state.can_reach_region("Region 2N", player)             and can_press_buttons(state, world, ["R2N Chase 1", "R2N Chase 2"]) and defeated_gilded_serpent(state, player))
-    set_rule_from_string(world, "(R2) Shadow Chase Reward",                         lambda state: can_dash(state, player)                   and has_grapple(state, player)                              and can_press_buttons(state, world, ["R2K Chase 1", "R2K Chase 2", "R2K Chase 3", "R2K Chase 4", "R2K Chase 5"]))
-    set_rule_from_string(world, "(R2S4) Water Room Pickup",                         lambda state: state.has("Solve Flower Puzzle", player))
-    set_rule_from_string(world, "(R2) George Reward 1",                             lambda state: can_dash(state, player)                   and state.has("Seeds", player, 10))
-    set_rule_from_string(world, "(R2) George Reward 2",                             lambda state: can_dash(state, player)                   and state.has("Seeds", player, 10))
-    set_rule_from_string(world, "(R2S2) Shadow Chase Pickup",                       lambda state: can_dash(state, player)                   and has_grapple(state, player)                              and can_press_buttons(state, world, ["R2K Chase 1", "R2K Chase 2", "R2K Chase 3", "R2K Chase 4", "R2K Chase 5"]))
+        construct_rule(world, "(R2) Serpent Boss Room Pickup",                  lambda state: can_dash(state, player)                   and state.can_reach_region("Region 2N", player)             and can_press_buttons(state, world, ["R2N Chase 1", "R2N Chase 2"]) and defeated_gilded_serpent(state, player))
+    construct_rule(world, "(R2) Shadow Chase Reward",                           lambda state: can_dash(state, player)                   and has_grapple(state, player)                              and can_press_buttons(state, world, ["R2K Chase 1", "R2K Chase 2", "R2K Chase 3", "R2K Chase 4", "R2K Chase 5"]))
+    construct_rule(world, "(R2S4) Water Room Pickup",                           lambda state: state.has("Solve Flower Puzzle", player))
+    construct_rule(world, "(R2) George Reward 1",                               lambda state: can_dash(state, player)                   and state.has("Seeds", player, 10))
+    construct_rule(world, "(R2) George Reward 2",                               lambda state: can_dash(state, player)                   and state.has("Seeds", player, 10))
+    construct_rule(world, "(R2S2) Shadow Chase Pickup",                         lambda state: can_dash(state, player)                   and has_grapple(state, player)                              and can_press_buttons(state, world, ["R2K Chase 1", "R2K Chase 2", "R2K Chase 3", "R2K Chase 4", "R2K Chase 5"]))
     if world.options.DashPuzzlesSolved.value:
-        set_rule_from_string(world, "(R2S2) Master Puzzle 1 - Map",                 lambda state: can_dash(state, player)                   and state.has("Silver Shard", player, 15))
+        construct_rule(world, "(R2S2) Master Puzzle 1 - Map",                   lambda state: can_dash(state, player)                   and state.has("Silver Shard", player, 15))
     else:
-        set_rule_from_string(world, "(R2S2) Master Puzzle 1 - Map",                 lambda state: can_dash(state, player)                   and state.has("Silver Shard", player, 15)                   and can_access_all_silver_shards(state, world))
+        construct_rule(world, "(R2S2) Master Puzzle 1 - Map",                   lambda state: can_dash(state, player)                   and state.has("Silver Shard", player, 15)                   and can_access_all_silver_shards(state, world))
 
 
     # Region 3
-    set_rule_from_string(world, "(R3) Green Stone Trial",                           lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3D Upper", "R3D Lower", "R3D Gate Upper"]))
-    set_rule_from_string(world, "(R3) Blue Stone Trial",                            lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3I Challenge 1", "R3I Challenge 2", "R3I Challenge 3", "R3I Challenge 4"]))
-    set_rule_from_string(world, "(R3) Red Stone Trial",                             lambda state: can_fight(state, world)                   and can_dash(state, player))
-    set_rule_from_string(world, "(R3) Silver Shard Puzzle 10 - Mirror",             lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3A Mirror Green", "R3A Mirror Blue"]))
-    set_rule_from_string(world, "(R3) Silver Shard Puzzle 11 - No Dash",            lambda state: can_dash(state, player))
+    construct_rule(world, "(R3) Green Stone Trial",                             lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3D Upper", "R3D Lower", "R3D Gate Upper"]))
+    construct_rule(world, "(R3) Blue Stone Trial",                              lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3I Challenge 1", "R3I Challenge 2", "R3I Challenge 3", "R3I Challenge 4"]))
+    construct_rule(world, "(R3) Red Stone Trial",                               lambda state: can_fight(state, world)                   and can_dash(state, player))
+    construct_rule(world, "(R3) Silver Shard Puzzle 10 - Mirror",               lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3A Mirror Green", "R3A Mirror Blue"]))
+    construct_rule(world, "(R3) Silver Shard Puzzle 11 - No Dash",              lambda state: can_dash(state, player))
     if world.options.DashPuzzlesSolved.value:
-        set_rule_from_string(world, "(R3) Silver Shard Puzzle 12 - QR",             lambda state: can_dash(state, player))
+        construct_rule(world, "(R3) Silver Shard Puzzle 12 - QR",               lambda state: can_dash(state, player))
     else:
-        set_rule_from_string(world, "(R3) Silver Shard Puzzle 12 - QR",             lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R3E QR Upper Left", "R3E QR Upper Right", "R3E QR Lower Left", "R3E QR Lower Right"]))
-    set_rule_from_string(world, "(R3) Silver Shard Puzzle 13 - Black Button",       lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3E Upper", "R3E Puzzle"]))
-    set_rule_from_string(world, "(R3) Silver Shard Puzzle 14 - Grapple",            lambda state: can_dash(state, player)                   and has_grapple(state, player))
-    set_rule_from_string(world, "(R3) Smile Token Puzzle 2 - Wizard",               lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3E Upper"]))
+        construct_rule(world, "(R3) Silver Shard Puzzle 12 - QR",               lambda state: can_dash(state, player)                   and can_press_buttons(state, world, ["R3E QR Upper Left", "R3E QR Upper Right", "R3E QR Lower Left", "R3E QR Lower Right"]))
+    construct_rule(world, "(R3) Silver Shard Puzzle 13 - Black Button",         lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3E Upper", "R3E Puzzle"]))
+    construct_rule(world, "(R3) Silver Shard Puzzle 14 - Grapple",              lambda state: can_dash(state, player)                   and has_grapple(state, player))
+    construct_rule(world, "(R3) Smile Token Puzzle 2 - Wizard",                 lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3E Upper"]))
     if get_button_color(world, "R3G Right") == ButtonColor.GREEN:
-        set_rule_from_string(world, "(R3) Smile Token Puzzle 7 - No Dash",          lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3G Right"]))
+        construct_rule(world, "(R3) Smile Token Puzzle 7 - No Dash",            lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3G Right"]))
     else:
-        set_rule_from_string(world, "(R3) Smile Token Puzzle 7 - No Dash",          lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3G Left", "R3G Right"]))
-    set_rule_from_string(world, "(R3) Wizard Reward",                               lambda state: collapse_available(state, player)         and can_dash(state, player))
-    set_rule_from_string(world, "(R3) Room Below Wizard Pickup",                    lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3E Upper"]))
-    set_rule_from_string(world, "(R3) Master Puzzle 3 - Counters",                  lambda state: can_dash_attack(state, player)            and has_grapple(state, player)                      and has_sword(state, player))
+        construct_rule(world, "(R3) Smile Token Puzzle 7 - No Dash",            lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3G Left", "R3G Right"]))
+    construct_rule(world, "(R3) Wizard Reward",                                 lambda state: collapse_available(state, player)         and can_dash(state, player))
+    construct_rule(world, "(R3) Room Below Wizard Pickup",                      lambda state: can_dash(state, player)                   and has_grapple(state, player)                      and can_press_buttons(state, world, ["R3E Upper"]))
+    construct_rule(world, "(R3) Master Puzzle 3 - Counters",                    lambda state: can_dash_attack(state, player)            and has_grapple(state, player)                      and has_sword(state, player))
     
 
     # Region 4
-    set_rule_from_string(world, "(R4) Spearman Reward",                             lambda state: True)
+    construct_rule(world, "(R4) Spearman Reward",                               lambda state: True)
     if get_button_color(world, "R4D Ultra-Multiparry") == ButtonColor.PINK:
-        set_rule_from_string(world, "(R4) Multiparry Gold Shard Puzzle",            lambda state: can_dash(state, player)                     and has_grapple(state, player)                    and can_press_buttons(state, world, ["R4D Ultra-Multiparry"]))
+        construct_rule(world, "(R4) Multiparry Gold Shard Puzzle",              lambda state: can_dash(state, player)                     and has_grapple(state, player)                    and can_press_buttons(state, world, ["R4D Ultra-Multiparry"]))
     else:
-        set_rule_from_string(world, "(R4) Multiparry Gold Shard Puzzle",            lambda state: can_dash(state, player)                     and can_press_buttons(state, world, ["R4D Ultra-Multiparry"]))
-    set_rule_from_string(world, "(R4) Platforming Gold Shard Room",                 lambda state: can_dash(state, player)                     and has_grapple(state, player)                    and can_parry(state, player) and has_sword(state, player) and can_press_buttons(state, world, ["R4D Platforming 1st", "R4D Platforming 2nd", "R4D Platforming 3rd", "R4D Platforming 4th", "R4D Platforming 5th"]))
-    set_rule_from_string(world, "(R4) Flower Puzzle Reward",                        lambda state: state.has("Solve Flower Puzzle", player)    and can_press_buttons(state, world, ["R4E Save"]))
-    set_rule_from_string(world, "(R4) Smile Token Puzzle 4 - Multiparry",           lambda state: can_dash(state, player)                     and has_grapple(state, player)                    and can_press_buttons(state, world, ["R4D Multiparry"]))
-    set_rule_from_string(world, "(R4) Smile Token Puzzle 5 - Entrance",             lambda state: can_dash(state, player))
-    set_rule_from_string(world, "(R4) Rosetta Stone Pickup",                        lambda state: can_dash(state, player))
-    set_rule_from_string(world, "(R4) Long Parry Platforming Room Pickup",          lambda state: can_dash(state, player)                     and has_grapple(state, player)                    and can_press_buttons(state, world, ["R4F Lower", "R4G 1st", "R4G 2nd", "R4G 3rd", "R4G 4th"]))
+        construct_rule(world, "(R4) Multiparry Gold Shard Puzzle",              lambda state: can_dash(state, player)                     and can_press_buttons(state, world, ["R4D Ultra-Multiparry"]))
+    construct_rule(world, "(R4) Platforming Gold Shard Room",                   lambda state: can_dash(state, player)                     and has_grapple(state, player)                    and can_parry(state, player) and has_sword(state, player) and can_press_buttons(state, world, ["R4D Platforming 1st", "R4D Platforming 2nd", "R4D Platforming 3rd", "R4D Platforming 4th", "R4D Platforming 5th"]))
+    construct_rule(world, "(R4) Flower Puzzle Reward",                          lambda state: state.has("Solve Flower Puzzle", player)    and can_press_buttons(state, world, ["R4E Save"]))
+    construct_rule(world, "(R4) Smile Token Puzzle 4 - Multiparry",             lambda state: can_dash(state, player)                     and has_grapple(state, player)                    and can_press_buttons(state, world, ["R4D Multiparry"]))
+    construct_rule(world, "(R4) Smile Token Puzzle 5 - Entrance",               lambda state: can_dash(state, player))
+    construct_rule(world, "(R4) Rosetta Stone Pickup",                          lambda state: can_dash(state, player))
+    construct_rule(world, "(R4) Long Parry Platforming Room Pickup",            lambda state: can_dash(state, player)                     and has_grapple(state, player)                    and can_press_buttons(state, world, ["R4F Lower", "R4G 1st", "R4G 2nd", "R4G 3rd", "R4G 4th"]))
 
 
     # Collapse
-    set_rule_from_string(world, "(Esc) Escape the Escape Sequence",                 lambda state: can_dash(state, player)                     and has_grapple(state, player)                    and state.can_reach_region("Region 2B", player))
+    construct_rule(world, "(Esc) Escape the Escape Sequence",                   lambda state: can_dash(state, player)                     and has_grapple(state, player)                    and state.can_reach_region("Region 2B", player))
 
 
     # Smile Shop
-    set_rule_from_string(world, "(Smile) Shop Item 1",                              lambda state: can_dash(state, player)                     and state.has("Smile Token", player, 10))
-    set_rule_from_string(world, "(Smile) Shop Item 2",                              lambda state: can_dash(state, player)                     and state.has("Smile Token", player, 10))
-    set_rule_from_string(world, "(Smile) Shop Item 3",                              lambda state: can_dash_attack(state, player)              and state.has("Smile Token", player, 10))         # item normally not available until you have dash attack
-    set_rule_from_string(world, "(Smile) Shop Item 4",                              lambda state: can_dash(state, player)                     and state.has("Smile Token", player, 10)          and can_parry(state, player))  # item not normally available until you have parry
-    set_rule_from_string(world, "(Smile) Dash Puzzle Reward",                       lambda state: can_dash(state, player))
+    construct_rule(world, "(Smile) Shop Item 1",                                lambda state: can_dash(state, player)                     and state.has("Smile Token", player, 10))
+    construct_rule(world, "(Smile) Shop Item 2",                                lambda state: can_dash(state, player)                     and state.has("Smile Token", player, 10))
+    construct_rule(world, "(Smile) Shop Item 3",                                lambda state: can_dash_attack(state, player)              and state.has("Smile Token", player, 10))         # item normally not available until you have dash attack
+    construct_rule(world, "(Smile) Shop Item 4",                                lambda state: can_dash(state, player)                     and state.has("Smile Token", player, 10)          and can_parry(state, player))  # item not normally available until you have parry
+    construct_rule(world, "(Smile) Dash Puzzle Reward",                         lambda state: can_dash(state, player))
 
 
     # Dark Region
-    set_rule_from_string(world, "(Dark) Secret Room Pickup",                        lambda state: defeated_null(state, player))
-    set_rule_from_string(world, "(Dark) Large Room Pickup in the Corner",           lambda state: can_dash(state, player)                     and has_grapple(state, player)                    and can_press_buttons(state, world, ["Dark 1", "Dark 2", "Dark 3", "Dark 4", "Dark 5", "Dark 6"]))
-    set_rule_from_string(world, "(Dark) Null Reward",                               lambda state: defeated_null(state, player))
+    construct_rule(world, "(Dark) Secret Room Pickup",                          lambda state: defeated_null(state, player))
+    construct_rule(world, "(Dark) Large Room Pickup in the Corner",             lambda state: can_dash(state, player)                     and has_grapple(state, player)                    and can_press_buttons(state, world, ["Dark 1", "Dark 2", "Dark 3", "Dark 4", "Dark 5", "Dark 6"]))
+    construct_rule(world, "(Dark) Null Reward",                                 lambda state: defeated_null(state, player))
 
 
     # The Between
-    set_rule_from_string(world, "(Between) Construct Reward",                       lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and can_fight(state, world)                     and can_dash_attack(state, player)                  and has_grapple(state, player)  and can_parry(state, player)                    and between_completion(state, world, 7))
-    set_rule_from_string(world, "(Between) Serpent Reward",                         lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and can_parry(state, player)                    and (state.has("Progressive Essence of George", player, 1)  or state.has("Shroud", player)) and state.has("Silver Shard", player, 9)    and between_completion(state, world, 2))
-    set_rule_from_string(world, "(Between) Wizard Reward",                          lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and can_parry(state, player)                    and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15)   and state.has("Gold Shard", player, 1)  and between_completion(state, world, 0))
-    set_rule_from_string(world, "(Between) Hot Spring Item",                        lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and can_parry(state, player)                    and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15)   and state.has("Gold Shard", player, 1)  and between_completion(state, world, 0))
-    set_rule_from_string(world, "(Between) Between Reward 1",                       lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and state.has("Progressive Parry", player, 2)   and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15)   and state.has("Gold Shard", player, 1)  and between_completion(state, world, 0))
-    set_rule_from_string(world, "(Between) Between Reward 2",                       lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and state.has("Progressive Parry", player, 2)   and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15)   and state.has("Gold Shard", player, 1)  and between_completion(state, world, 0))
+    construct_rule(world, "(Between) Construct Reward",                         lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and can_fight(state, world)                     and can_dash_attack(state, player)                  and has_grapple(state, player)  and can_parry(state, player)                    and between_completion(state, world, 7))
+    construct_rule(world, "(Between) Serpent Reward",                           lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and can_parry(state, player)                    and (state.has("Progressive Essence of George", player, 1)  or state.has("Shroud", player)) and state.has("Silver Shard", player, 9)    and between_completion(state, world, 2))
+    construct_rule(world, "(Between) Wizard Reward",                            lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and can_parry(state, player)                    and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15)   and state.has("Gold Shard", player, 1)  and between_completion(state, world, 0))
+    construct_rule(world, "(Between) Hot Spring Item",                          lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and can_parry(state, player)                    and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15)   and state.has("Gold Shard", player, 1)  and between_completion(state, world, 0))
+    construct_rule(world, "(Between) Between Reward 1",                         lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and state.has("Progressive Parry", player, 2)   and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15)   and state.has("Gold Shard", player, 1)  and between_completion(state, world, 0))
+    construct_rule(world, "(Between) Between Reward 2",                         lambda state: can_press_buttons(state, world, ["Between Gate Left"])    and state.has("Progressive Sword", player, 2)   and state.has("Progressive Dash Orb", player, 3)    and has_grapple(state, player)  and state.has("Progressive Parry", player, 2)   and state.has("Progressive Essence of George", player, 1)   and state.has("Shroud", player) and state.has("Silver Shard", player, 15)   and state.has("Gold Shard", player, 1)  and between_completion(state, world, 0))
 
 
     # Act 1
-    set_rule_from_string(world, "(Void 1) Enter Void Reward",                       lambda state: True)
-    set_rule_from_string(world, "(Void 1) Void Gate Shard Location 1",              lambda state: can_dash(state, player))
-    set_rule_from_string(world, "(Void 1) Void Gate Shard Location 2",              lambda state: can_dash(state, player)   and state.has("Shroud", player))
-    set_rule_from_string(world, "(Void 1) Void Gate Shard Location 3",              lambda state: can_dash(state, player)   or state.has("Shroud", player))
-    set_rule_from_string(world, "(Void 1) Void Gate Shard Location 4",              lambda state: can_dash(state, player))
-    set_rule_from_string(world, "(Void 1) Void Gate Shard Location 5",              lambda state: can_dash(state, player)   and has_grapple(state, player))
-    set_rule_from_string(world, "(Void 1) Void Gate Shard Location 6",              lambda state: can_dash(state, player))
-    set_rule_from_string(world, "(Void 1) Void Gate Shard Location 7",              lambda state: can_dash(state, player))
-    set_rule_from_string(world, "(Void 1) John Room Pickup",                        lambda state: can_dash(state, player))
+    construct_rule(world, "(Void 1) Enter Void Reward",                         lambda state: True)
+    construct_rule(world, "(Void 1) Void Gate Shard Location 1",                lambda state: can_dash(state, player))
+    construct_rule(world, "(Void 1) Void Gate Shard Location 2",                lambda state: can_dash(state, player)   and state.has("Shroud", player))
+    construct_rule(world, "(Void 1) Void Gate Shard Location 3",                lambda state: can_dash(state, player)   or state.has("Shroud", player))
+    construct_rule(world, "(Void 1) Void Gate Shard Location 4",                lambda state: can_dash(state, player))
+    construct_rule(world, "(Void 1) Void Gate Shard Location 5",                lambda state: can_dash(state, player)   and has_grapple(state, player))
+    construct_rule(world, "(Void 1) Void Gate Shard Location 6",                lambda state: can_dash(state, player))
+    construct_rule(world, "(Void 1) Void Gate Shard Location 7",                lambda state: can_dash(state, player))
+    construct_rule(world, "(Void 1) John Room Pickup",                          lambda state: can_dash(state, player))
 
 
     # Act 2
-    set_rule_from_string(world, "(Void 2) Free Item",                               lambda state: True)
-    set_rule_from_string(world, "(Void 2) Boss Rush Heal 1",                        lambda state: can_fight(state, world))
-    set_rule_from_string(world, "(Void 2) Boss Rush Heal 2",                        lambda state: has_sword(state, player)  and can_dash_attack(state, player)  and (state.has("Shroud", player)    or state.has("Progressive Essence of George", player, 1)))
-    set_rule_from_string(world, "(Void 2) Boss Rush Heal 3",                        lambda state: has_sword(state, player)  and can_dash_attack(state, player)  and (state.has("Shroud", player)    or state.has("Progressive Essence of George", player, 1)))
-    set_rule_from_string(world, "(Void 2) Boss Rush Heal 4",                        lambda state: has_sword(state, player)  and can_dash_attack(state, player)  and (state.has("Shroud", player)    or state.has("Progressive Essence of George", player, 1))   and has_grapple(state, player))
-    set_rule_from_string(world, "(Void 2) Pink Bow Pickup",                         lambda state: True)
+    construct_rule(world, "(Void 2) Free Item",                                 lambda state: True)
+    construct_rule(world, "(Void 2) Boss Rush Heal 1",                          lambda state: can_fight(state, world))
+    construct_rule(world, "(Void 2) Boss Rush Heal 2",                          lambda state: has_sword(state, player)  and can_dash_attack(state, player)  and (state.has("Shroud", player)    or state.has("Progressive Essence of George", player, 1)))
+    construct_rule(world, "(Void 2) Boss Rush Heal 3",                          lambda state: has_sword(state, player)  and can_dash_attack(state, player)  and (state.has("Shroud", player)    or state.has("Progressive Essence of George", player, 1)))
+    construct_rule(world, "(Void 2) Boss Rush Heal 4",                          lambda state: has_sword(state, player)  and can_dash_attack(state, player)  and (state.has("Shroud", player)    or state.has("Progressive Essence of George", player, 1))   and has_grapple(state, player))
+    construct_rule(world, "(Void 2) Pink Bow Pickup",                           lambda state: True)
 
     # Act 3
-    set_rule_from_string(world, "(Void 3) Preminition Reward",                      lambda state: True)
+    construct_rule(world, "(Void 3) Preminition Reward",                        lambda state: True)
 
     # Randomized Buttons
     if world.options.ButtonSanity.value:
@@ -623,5 +623,5 @@ def connect_areas(world: "GlyphsWorld", source: str, target: str, rule: Collecti
 def set_button_rule(world: "GlyphsWorld", button: str, rule: CollectionRule) -> None:
     set_rule(world.get_location(get_button_name(world, button)), rule=rule)
 
-def set_rule_from_string(world: "GlyphsWorld", location_name: str, rule: CollectionRule) -> None:
+def construct_rule(world: "GlyphsWorld", location_name: str, rule: CollectionRule) -> None:
     set_rule(world.get_location(location_name), rule=rule)
