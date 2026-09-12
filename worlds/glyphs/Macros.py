@@ -1,13 +1,54 @@
+from collections.abc import Callable
+
 from BaseClasses import CollectionState
 from typing import TYPE_CHECKING
-from .Options import GlyphsOptions
+
 from .Buttons import get_button_color
 from .Types import ButtonColor
 
-options: GlyphsOptions
-
 if TYPE_CHECKING:
     from . import GlyphsWorld
+
+def set_macro_rules(world: "GlyphsWorld") -> None:
+    player = world.player
+
+    if world.options.LogicalWallJumps.value:
+        world.wall_jump_rule = lambda state: can_dash(state, player)
+    else:
+        world.wall_jump_rule = lambda state: False
+
+    if world.options.SwordlessCombat.value:
+        world.can_fight_rule = lambda state: state.has("Progressive Sword", player, 1) or state.has("Progressive Dash Orb", player, 2)
+    else:
+        world.can_fight_rule = lambda state: state.has("Progressive Sword", player, 1)
+
+    required_glyphstones = world.options.WizardRequirements.value
+    world.wizard_available_rule = lambda state: state.has("Glyphstone", player, required_glyphstones)
+
+    key = world.options.WraithRequirements.current_key.lower()
+    if key == "none":
+        world.wraith_available_rule = lambda state: True
+    elif key == "vanilla":
+        world.wraith_available_rule = lambda state: state.has("Silver Shard", player, 15)
+    elif key == "intended":
+        world.wraith_available_rule = lambda state: state.has("Silver Shard", player, 15) and state.has("Glyphstone", player, 3)
+    elif key == "silver_shards":
+        count = world.options.WraithSilverCount.value
+        world.wraith_available_rule = lambda state: state.has("Silver Shard", player, count)
+    elif key == "gold_shards":
+        count = world.options.WraithGoldCount.value
+        world.wraith_available_rule = lambda state: state.has("Gold Shard", player, count)
+    elif key == "smile_tokens":
+        count = world.options.WraithSmileCount.value
+        world.wraith_available_rule = lambda state: state.has("Smile Token", player, count)
+    elif key == "rune_cubes":
+        count = world.options.WraithRuneCount.value
+        world.wraith_available_rule = lambda state: state.has("Rune Cube", player, count)
+    elif key == "glyphstones":
+        count = world.options.WraithGlyphstoneCount.value
+        world.wraith_available_rule = lambda state: state.has("Glyphstone", player, count)
+
+    world.macro_init = True
 
 def has_sword(state: CollectionState, player: int) -> bool:
     return state.has("Progressive Sword", player, 1)
@@ -18,38 +59,90 @@ def can_dash(state: CollectionState, player: int) -> bool:
 def can_dash_attack(state: CollectionState, player: int) -> bool:
     return state.has("Progressive Dash Orb", player, 2)
 
-def can_wall_jump(state: CollectionState, player: int, world: "GlyphsWorld") -> bool:
-    return can_dash(state, player) and world.options.LogicalWallJumps.value
+def can_wall_jump(state: CollectionState, world: "GlyphsWorld") -> bool:
+    return world.wall_jump_rule(state)
 
 ## Logically will never be needed
 # def can_chain_wall_jumps(state: CollectionState, player: int, world: "GlyphsWorld") -> bool:
 #     return can_wall_jump(state, player, world) and world.options.LogicalWallJumpChains.value
 
-def can_press_buttons(state: CollectionState, player: int, world: "GlyphsWorld", button_list: list[str]) -> bool:
-    for button in button_list:
-        if not can_press_button(state, player, world, button):
+def can_press_buttons(state: CollectionState, world: "GlyphsWorld", button_list: list[str], allowedFaults: int=0) -> bool:
+    player = world.player
+    items = state.prog_items[player]
+    prog_dash = items["Progressive Dash Orb"]
+    has_parry = items["Progressive Parry"] >= 1
+    has_sword = items["Progressive Sword"] >= 1
+    faults = 0
+
+    for key in button_list:
+        button = world.buttons[key]
+
+        if button.isBroken and not items[button.shardName]:
+            faults += 1
+        elif button.color == ButtonColor.PINK:
+            faults += not has_parry
+        elif button.color == ButtonColor.BLUE:
+            faults += prog_dash < 1
+        elif button.color == ButtonColor.YELLOW:
+            faults += prog_dash < 2
+        elif button.color == ButtonColor.GREEN:
+            faults += prog_dash < 2 and not has_sword
+
+        if faults > allowedFaults:
             return False
+
     return True
 
-def can_press_button(state: CollectionState, player: int, world: "GlyphsWorld", button: str) -> bool:
-    color = get_button_color(world, button)
-    if color == ButtonColor.RED or color == ButtonColor.BLACK:
-        return True
-    if color == ButtonColor.BLUE:
-        return can_dash(state, player)
-    if color == ButtonColor.GREEN:
-        return can_press_green_buttons(state, player)
-    if color == ButtonColor.YELLOW:
-        return can_dash_attack(state, player)
-    if color == ButtonColor.PINK:
-        return can_parry(state, player)
-    return True
+def between_buttons_missing(state: CollectionState, world: "GlyphsWorld") -> int:
+    """
+    DEPRICATED
+    Use between_completion instead
+    """
+    count = 0
+    if not can_press_buttons(state, world, ["Between rm1"]):
+        count += 1
+    if not can_press_buttons(state, world, ["Between rm4"]):
+        count += 1
+    if not can_press_buttons(state, world, ["Between rm5"]):
+        count += 1
+    if not can_press_buttons(state, world, ["Between rm10"]):
+        count += 1
+    if not can_press_buttons(state, world, ["Between rm13"]):
+        count += 1
+    if not can_press_buttons(state, world, ["Between rm19"]):
+        count += 1
+    if not can_press_buttons(state, world, ["Between rm28"]):
+        count += 1
+    if not can_press_buttons(state, world, ["Between rm30"]):
+        count += 1
+    if not can_press_buttons(state, world, ["Between rm39"]):
+        count += 1
+    if not can_press_buttons(state, world, ["Between rm40"]):
+        count += 1
+    if not can_press_buttons(state, world, ["Between rm43 Button 1"]):
+        count += 1
+    if not can_press_buttons(state, world, ["Between rm43 Button 2"]):
+        count += 1
+    if not can_press_buttons(state, world, ["Between rm57"]):
+        count += 1
+    if not can_press_buttons(state, world, ["Between rm66"]):
+        count += 1
+    if not can_press_buttons(state, world, ["Between rm71"]):
+        count += 1
+    if not can_press_buttons(state, world, ["Between Pre-Boss 1"]):
+        count += 1
+    return count
+
+def between_completion(state: CollectionState, world: "GlyphsWorld", missing_allowed: int=0) -> bool:
+    buttons_to_check = ["Between rm1", "Between rm4", "Between rm5", "Between rm10", "Between rm13", "Between rm19", "Between rm28", "Between rm30", "Between rm39",
+                        "Between rm40", "Between rm43 Button 1", "Between rm43 Button 2", "Between rm57", "Between rm66", "Between rm71", "Between Pre-Boss 1"]
+    return can_press_buttons(state, world, buttons_to_check, missing_allowed)
 
 def can_press_green_buttons(state: CollectionState, player: int) -> bool:
     return state.has("Progressive Sword", player, 1) or state.has("Progressive Dash Orb", player, 2)
 
-def can_fight(state: CollectionState, player: int, world: "GlyphsWorld") -> bool:
-    return state.has("Progressive Sword", player, 1) or (state.has("Progressive Dash Orb", player, 2) and world.options.SwordlessCombat.value)
+def can_fight(state: CollectionState, world: "GlyphsWorld") -> bool:
+    return world.can_fight_rule(state)
 
 def can_warp(state: CollectionState, player: int) -> bool:
     return state.has("Map", player)
@@ -60,55 +153,25 @@ def has_grapple(state: CollectionState, player: int) -> bool:
 def can_parry(state: CollectionState, player: int) -> bool:
     return state.has("Progressive Parry", player, 1)
 
-def serpent_door_open(state: CollectionState, player: int, world: "GlyphsWorld") -> bool:
-    return state.has("Serpent Lock 1", player) and state.has("Serpent Lock 2", player) and state.has("Serpent Lock 3", player) and can_press_button(state, player, world, "R2B Gate Left")
+def serpent_door_open(state: CollectionState, world: "GlyphsWorld") -> bool:
+    player = world.player
+    return state.has("Serpent Lock 1", player) and state.has("Serpent Lock 2", player) and state.has("Serpent Lock 3", player) and can_press_buttons(state, world, ["R2B Gate Left"])
 
 def stalker_sigils_present(state: CollectionState, player: int) -> bool:
     return state.has("False Ending", player)
 
-def shadow_chase_open(state: CollectionState, player: int, world: "GlyphsWorld") -> bool:
-    return state.has("Stalker Sigil 1", player) and state.has("Stalker Sigil 2", player) and state.has("Stalker Sigil 3", player) and can_press_button(state, player, world, "R2J Gate Left")
+def shadow_chase_open(state: CollectionState, world: "GlyphsWorld") -> bool:
+    player = world.player
+    return state.has("Stalker Sigil 1", player) and state.has("Stalker Sigil 2", player) and state.has("Stalker Sigil 3", player) and can_press_buttons(state, world, ["R2J Gate Left"])
 
 def has_clarity(state: CollectionState, player: int) -> bool:
     return state.has("Clarity", player)
 
-def wizard_fight_available(state: CollectionState, player: int, world: "GlyphsWorld") -> bool:
-    return state.has("Glyphstone", player, world.options.WizardRequirements.value)
+def wizard_fight_available(state: CollectionState, world: "GlyphsWorld") -> bool:
+    return world.wizard_available_rule(state)
 
-def wraith_fight_available(state: CollectionState, player: int, world: "GlyphsWorld") -> bool:
-    key = world.options.WraithRequirements.current_key.lower()
-    if key == "none":
-        return True
-    if key == "vanilla":
-        return state.has("Silver Shard", player, 15)
-    if key == "intended":
-        return state.has("Silver Shard", player, 15) and state.has("Glyphstone", player, 3)
-    if key == "silver_shards":
-        return has_wraith_silvers(state, player, world)
-    if key == "gold_shards":
-        return has_wraith_golds(state, player, world)
-    if key == "smile_tokens":
-        return has_wraith_smiles(state, player, world)
-    if key == "rune_cubes":
-        return has_wraith_runes(state, player, world)
-    if key == "glyphstones":
-        return has_wraith_glyphstones(state, player, world)
-    return False
-
-def has_wraith_silvers(state: CollectionState, player: int, world: "GlyphsWorld") -> bool:
-    return state.has("Silver Shard", player, world.options.WraithSilverCount.value)
-
-def has_wraith_golds(state: CollectionState, player: int, world: "GlyphsWorld") -> bool:
-    return state.has("Gold Shard", player, world.options.WraithGoldCount.value)
-
-def has_wraith_smiles(state: CollectionState, player: int, world: "GlyphsWorld") -> bool:
-    return state.has("Smile Token", player, world.options.WraithSmileCount.value)
-
-def has_wraith_runes(state: CollectionState, player: int, world: "GlyphsWorld") -> bool:
-    return state.has("Rune Cube", player, world.options.WraithRuneCount.value)
-
-def has_wraith_glyphstones(state: CollectionState, player: int, world: "GlyphsWorld") -> bool:
-    return state.has("Glyphstone", player, world.options.WraithGlyphstoneCount.value)
+def wraith_fight_available(state: CollectionState, world: "GlyphsWorld") -> bool:
+    return world.wraith_available_rule(state)
 
 def defeated_runic_construct(state: CollectionState, player: int) -> bool:
     return state.has("Defeat Runic Construct", player)
@@ -154,25 +217,34 @@ def can_solve_flower_puzzle(state: CollectionState, player: int) -> bool:
     """
     return can_start_flower_puzzle(state, player) and defeated_gilded_serpent(state, player) and can_dash(state, player) and can_press_green_buttons(state, player) and has_grapple(state, player)
 
-def flower_puzzle_completion(state: CollectionState, player: int, world: "GlyphsWorld") -> int:
+def flower_puzzle_completion(state: CollectionState, world: "GlyphsWorld", target: int=3) -> bool:
     """
     If used in an entrance access rule, wrap with `multiworld.register_indirect_condition(world.get_region("Region 1E"), <foo>)`.
     """
+    player = world.player
     completion = 0
-    wall_jump = can_wall_jump(state, player, world)
-    if state.can_reach_region("Region 1E", player) and can_dash(state, player) and can_press_buttons(state, player, world, ["R1B 4th Lowest", "R1B 5th Lowest"]) and (wall_jump or can_press_button(state, player, world, "R1B 6th Lowest")):
+    wall_jump = can_wall_jump(state, world)
+    if target <= 0:
+        return True
+    if state.can_reach_region("Region 1E", player) and can_dash(state, player) and can_press_buttons(state, world, ["R1B 4th Lowest", "R1B 5th Lowest"]) and (wall_jump or can_press_buttons(state, world, ["R1B 6th Lowest"])):
         completion += 1
+        if completion >= target:
+            return True
     else:
-        return completion
-    if can_press_buttons(state, player, world, ["R1B Map Room", "R2A Gate Left", "R2A Upper", "R2G Lower", "R2G Middle", "R2G Moving Platform", "R2N Chase 1"]) and (wall_jump or can_press_button(state, player, world, "R1F Right")) and (can_parry(state, player) or (get_button_color(world, "R2G Upper Middle") != ButtonColor.BLACK and can_press_buttons(state, player, world, ["R2G Upper Left", "R2G Upper Middle"]))):
+        return False
+    if can_press_buttons(state, world, ["R1B Map Room", "R2A Gate Left", "R2A Upper", "R2G Lower", "R2G Middle", "R2G Moving Platform", "R2N Chase 1"]) and (wall_jump or can_press_buttons(state, world, ["R1F Right"])) and (can_parry(state, player) or (get_button_color(world, "R2G Upper Middle") != ButtonColor.BLACK and can_press_buttons(state, world, ["R2G Upper Left", "R2G Upper Middle"]))):
         completion += 1
+        if completion >= target:
+            return True
     else:
-        return completion
-    if defeated_gilded_serpent(state, player) and has_grapple(state, player) and can_press_button(state, player, world, "R2P Left"):
-        completion += 1
-    return completion
+        return False
+    return defeated_gilded_serpent(state, player) and has_grapple(state, player) and can_press_buttons(state, world, ["R2P Left"])
 
-def can_access_all_silver_shards(state: CollectionState, player: int) -> bool:
+def can_access_all_silver_shards_old(state: CollectionState, player: int) -> bool:
+    """
+    DEPRICATED
+    Use can_access_all_silver_shards instead
+    """
     return (
         state.can_reach_location("(R1) Silver Shard Puzzle 1 - Map", player) and
         state.can_reach_location("(R1) Silver Shard Puzzle 2 - Grapple", player) and
@@ -189,4 +261,27 @@ def can_access_all_silver_shards(state: CollectionState, player: int) -> bool:
         state.can_reach_location("(R3) Silver Shard Puzzle 13 - Black Button", player) and
         state.can_reach_location("(R3) Silver Shard Puzzle 14 - Grapple", player) and
         state.can_reach_location("(R2) Silver Shard Puzzle 15 - Escape Serpent", player)
+    )
+
+# Should be logically equivalent to can_access_all_silver_shards_old
+def can_access_all_silver_shards(state: CollectionState, world: "GlyphsWorld") -> bool:
+    player = world.player
+    return (
+        can_dash(state, player) and has_grapple(state, player) and (defeated_gilded_serpent(state, player) or can_fight(state, world)) and
+        (can_wall_jump(state, world) or can_press_buttons(state, world, ["R1B Lowest", "R1B 3rd Lowest", "R1B 6th Lowest"])) and
+        (can_parry(state, player) or (get_button_color(world, "R2G Upper Middle") != ButtonColor.BLACK and can_press_buttons(state, world, ["R2G Upper Left", "R2G Upper Middle"]))) and
+        can_press_buttons(state, world, ["R1B 4th Lowest", "R1B 5th Lowest", "R2E Lower", "R2G Middle", "R2G Moving Platform", "R2N Chase 1", "R3E Upper"]) and
+        state.can_reach_region("Region 1A", player) and
+        state.can_reach_region("Region 1B", player) and
+        state.can_reach_region("Region 1F", player) and
+        state.can_reach_region("Region 2A", player) and
+        state.can_reach_region("Region 2B", player) and
+        state.can_reach_region("Region 2E", player) and
+        state.can_reach_region("Region 2G", player) and
+        state.can_reach_region("Region 2N", player) and
+        state.can_reach_region("Region 2P", player) and
+        state.can_reach_region("Region 2Q", player) and
+        state.can_reach_region("Region 3B", player) and
+        state.can_reach_region("Region 3E", player) and
+        state.can_reach_region("Region 3I", player)
     )

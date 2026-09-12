@@ -1,16 +1,16 @@
-import logging
-from BaseClasses import ItemClassification, MultiWorld, Item, Tutorial
+from BaseClasses import MultiWorld, Item, Tutorial
+from Options import OptionError
 from worlds.AutoWorld import World, CollectionState, WebWorld
-from typing import Dict, TextIO
+from typing import Callable, Dict, TextIO
 
-from worlds.glyphs.SmileShopRando import get_shop_prices
-from worlds.glyphs.Types import GlyphsItem
+from .Shop import get_shop_prices
+from .Types import ButtonData, ButtonColor, ItemData
 from .Locations import get_location_names, get_total_locations
-from .Items import create_item, create_itempool, item_table, glyphs_hats
+from .Items import create_item, create_itempool, item_table, hats
 from .Options import GlyphsOptions
 from .Regions import create_regions
 from .Rules import set_rules, connect_entrances
-from .Buttons import randomize_colors, get_raw_button_data, get_button_spoiler_data
+from .Buttons import get_broken_button_ids, randomize_buttons, get_raw_button_color_data, get_button_color_spoiler_data, get_broken_button_spoiler_data
 
 class GlyphsWeb(WebWorld):
     theme = "stone"
@@ -34,27 +34,67 @@ class GlyphsWorld(World):
     """
 
     game = "GLYPHS"
-    item_name_to_id = {name: data.ap_code for name, data in item_table.items()}
+    item_name_to_id = {name: data.ap_code for name, data in item_table.items() if data.ap_code is not None}
     location_name_to_id = get_location_names()
+    options: GlyphsOptions
     options_dataclass = GlyphsOptions
     web = GlyphsWeb()
+    shop_prices: list[int]
+    buttons: dict[str, ButtonData]
+    items: dict[str, ItemData]
+    origin_region_name = "Menu"
+
+    # Macros to be used in Macros.py
+    macro_init = False
+    wall_jump_rule: Callable[[CollectionState], bool]
+    can_fight_rule: Callable[[CollectionState], bool]
+    wizard_available_rule: Callable[[CollectionState], bool]
+    wraith_available_rule: Callable[[CollectionState], bool]
 
     def __init__(self, multiworld: "MultiWorld", player: int):
         super().__init__(multiworld, player)
 
     def generate_early(self):
-        starting_chapter = "Menu"
-        self.multiworld.push_precollected(create_item(self, starting_chapter))
+        # This can be increased if the world gets less restrictive
+        # Goal is to keep failure rate <=0.1% in the fuzzer
+        if not self.options.ButtonSanity.value and self.options.ButtonShardPercent.value > 1:
+            self.options.ButtonShardPercent.value = 1
+
         self.multiworld.push_precollected(create_item(self, "Map"))
-        if self.options.StartingSword.value:
-            self.multiworld.push_precollected(create_item(self, "Progressive Sword"))
-        if self.options.StartingDash.value:
-            self.multiworld.push_precollected(create_item(self, "Progressive Dash Orb"))
+
         if not self.options.HatShuffle.value:
-            for item_name, item_data in glyphs_hats.items():
+            for item_name, item_data in hats.items():
                 for _ in range(item_data.count or 1):
                     self.multiworld.push_precollected(create_item(self, item_name))
-        randomize_colors(self, self.options.RandomButtonColorPercent.value)
+
+        if self.options.StartingSword.value:
+            self.multiworld.push_precollected(create_item(self, "Progressive Sword"))
+        elif not self.options.SwordlessCombat.value:
+            self.multiworld.early_items[self.player]["Progressive Sword"] = 1
+
+        if self.options.StartingDash.value:
+            self.multiworld.push_precollected(create_item(self, "Progressive Dash Orb"))
+        else:
+            self.multiworld.early_items[self.player]["Progressive Dash Orb"] = 1
+
+        randomize_buttons(self, self.options.RandomButtonColorPercent.value, self.options.ButtonShardPercent.value)
+
+        early_button_1 = self.buttons["R1C First"]
+        early_button_2 = self.buttons["R1C Second"]
+
+        if not self.options.StartingDash.value:
+            if early_button_1.color != ButtonColor.RED:
+                early_button_1.color = ButtonColor.RED
+            if early_button_2.color != ButtonColor.RED:
+                early_button_2.color = ButtonColor.RED
+
+        r1_roadblock_button_1 = self.buttons["R1F Right"]
+        r1_roadblock_button_2 = self.buttons["R2A Gate Left"]
+
+        if r1_roadblock_button_1.isBroken and not self.options.LogicalWallJumps.value:
+            self.multiworld.early_items[self.player][r1_roadblock_button_1.shardName] = 1
+        if r1_roadblock_button_2.isBroken:
+            self.multiworld.early_items[self.player][r1_roadblock_button_2.shardName] = 1
     
     def set_rules(self):
         set_rules(self)
@@ -79,6 +119,7 @@ class GlyphsWorld(World):
                 #"Multiplayer":             self.options.Multiplayer.value,
                 "DeathLink":               self.options.DeathLink.value,
                 "ButtonColorsRandomized":  self.options.RandomButtonColorPercent.value != 0,
+                "ButtonShardsRandomized":  self.options.ButtonShardPercent.value != 0,
                 "WizardRequirements":      self.options.WizardRequirements.value,
                 "WraithRequirements":      self.options.WraithRequirements.value,
                 "WraithSilverCount":       self.options.WraithSilverCount.value,
@@ -88,7 +129,8 @@ class GlyphsWorld(World):
                 "WraithGlyphstoneCount":   self.options.WraithGlyphstoneCount.value,
             },
             "shop_prices": prices,
-            "button_colors": get_raw_button_data(self),
+            "button_colors": get_raw_button_color_data(self),
+            "broken_buttons": get_broken_button_ids(self),
             "Seed": self.multiworld.seed_name,
             "Slot": self.multiworld.player_name[self.player],
             "TotalLocations": get_total_locations(self)
@@ -97,8 +139,12 @@ class GlyphsWorld(World):
         return slot_data
 
     def write_spoiler(self, spoiler_handle: TextIO) -> None:
-        spoiler_handle.write(f"\nGLYPHS: Smile Shop Prices ({self.player_name}): {get_shop_prices(self)}")
-        spoiler_handle.write(f"\nGLYPHS: Button Colors ({self.player_name}): {get_button_spoiler_data(self)}")
+        if self.options.RandomShopPrices.value:
+            spoiler_handle.write(f"\nGLYPHS: Smile Shop Prices ({self.player_name}): {get_shop_prices(self)}\n")
+        if self.options.RandomButtonColorPercent.value != 0:
+            spoiler_handle.write(f"\nGLYPHS: Button Colors ({self.player_name}): {get_button_color_spoiler_data(self)}\n")
+        if self.options.ButtonShardPercent.value != 0:
+            spoiler_handle.write(f"\nGLYPHS: Broken Buttons ({self.player_name}): {get_broken_button_spoiler_data(self)}\n")
 
     def collect(self, state: "CollectionState", item: "Item") -> bool:
         return super().collect(state, item)
