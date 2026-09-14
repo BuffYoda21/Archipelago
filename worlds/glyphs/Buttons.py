@@ -10,12 +10,14 @@ options: GlyphsOptions
 if TYPE_CHECKING:
     from . import GlyphsWorld
 
-def randomize_buttons(world: "GlyphsWorld", color_percentage: int = 0, shard_percentage: int = 0) -> None:
-    buttons_to_randomize: list[str] = []
+def init_buttons(world: "GlyphsWorld") -> None:
     world.buttons = {
         name: deepcopy(button)
         for name, button in glyphs_buttons.items()
     }
+
+def randomize_buttons(world: "GlyphsWorld", color_percentage: int = 0, shard_percentage: int = 0) -> None:
+    buttons_to_randomize: list[str] = []
 
     # Randomize colors
     if color_percentage > 0:
@@ -96,6 +98,14 @@ def get_broken_button_spoiler_data(world: "GlyphsWorld") -> list[str]:
         if value.isBroken:
             broken_buttons.append(key)
     return broken_buttons
+
+# for universal tracker compatibility
+def load_button_spoiler_data(world: "GlyphsWorld", color_data: dict[int, int], broken_data: list[int] = []) -> None:
+    for button in world.buttons.values():
+        if button.id in color_data:
+            button.color = ButtonColor(color_data[button.id])
+        if button.id in broken_data:
+            button.isBroken = True
 
 glyphs_buttons = {
     "R1A Save":                 ButtonData(0,   "Region 1A",        ButtonColor.RED,    validColors=[ButtonColor.RED]),

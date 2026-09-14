@@ -1,7 +1,7 @@
 from BaseClasses import MultiWorld, Item, Tutorial
-from Options import OptionError
+from Options import Option, OptionError
 from worlds.AutoWorld import World, CollectionState, WebWorld
-from typing import Callable, Dict, TextIO
+from typing import Any, Callable, Dict, Optional, TextIO
 
 from .Shop import get_shop_prices
 from .Types import ButtonData, ButtonColor, ItemData
@@ -10,7 +10,7 @@ from .Items import create_item, create_itempool, item_table, hats
 from .Options import GlyphsOptions
 from .Regions import create_regions
 from .Rules import set_rules, connect_entrances
-from .Buttons import get_broken_button_ids, randomize_buttons, get_raw_button_color_data, get_button_color_spoiler_data, get_broken_button_spoiler_data
+from .Buttons import get_broken_button_ids, init_buttons, load_button_spoiler_data, randomize_buttons, get_raw_button_color_data, get_button_color_spoiler_data, get_broken_button_spoiler_data
 
 class GlyphsWeb(WebWorld):
     theme = "stone"
@@ -42,6 +42,7 @@ class GlyphsWorld(World):
     shop_prices: list[int]
     buttons: dict[str, ButtonData]
     items: dict[str, ItemData]
+    is_ut = False
     origin_region_name = "Menu"
 
     # Macros to be used in Macros.py
@@ -55,6 +56,30 @@ class GlyphsWorld(World):
         super().__init__(multiworld, player)
 
     def generate_early(self):
+        self.is_ut = getattr(self.multiworld, "generation_is_fake", False)
+
+        init_buttons(self)
+
+        re_gen_passthrough = getattr(self.multiworld, "re_gen_passthrough", {})
+        if re_gen_passthrough and self.game in re_gen_passthrough:
+            slot_data: dict[str, Any] = re_gen_passthrough[self.game]
+
+            if slot_data:
+                button_colors: dict[int, int] = {
+                    int(button_id): color
+                    for button_id, color in slot_data["button_colors"].items()
+                }
+                broken_buttons: list[int] = []
+                if slot_data["broken_buttons"]:
+                    broken_buttons = slot_data["broken_buttons"]
+                load_button_spoiler_data(self, button_colors, broken_buttons)
+
+            slot_options: dict[str, Any] = slot_data.get("options", {})
+            for key, value in slot_options.items():
+                opt: Optional[Option] = getattr(self.options, key, None)
+                if opt is not None:
+                    setattr(self.options, key, opt.from_any(value))
+
         # This can be increased if the world gets less restrictive
         # Goal is to keep failure rate <=0.1% in the fuzzer
         if not self.options.ButtonSanity.value and self.options.ButtonShardPercent.value > 1:
@@ -77,16 +102,17 @@ class GlyphsWorld(World):
         else:
             self.multiworld.early_items[self.player]["Progressive Dash Orb"] = 1
 
-        randomize_buttons(self, self.options.RandomButtonColorPercent.value, self.options.ButtonShardPercent.value)
+        if not self.is_ut:
+            randomize_buttons(self, self.options.RandomButtonColorPercent.value, self.options.ButtonShardPercent.value)
 
-        early_button_1 = self.buttons["R1C First"]
-        early_button_2 = self.buttons["R1C Second"]
+            early_button_1 = self.buttons["R1C First"]
+            early_button_2 = self.buttons["R1C Second"]
 
-        if not self.options.StartingDash.value:
-            if early_button_1.color != ButtonColor.RED:
-                early_button_1.color = ButtonColor.RED
-            if early_button_2.color != ButtonColor.RED:
-                early_button_2.color = ButtonColor.RED
+            if not self.options.StartingDash.value:
+                if early_button_1.color != ButtonColor.RED:
+                    early_button_1.color = ButtonColor.RED
+                if early_button_2.color != ButtonColor.RED:
+                    early_button_2.color = ButtonColor.RED
 
         r1_roadblock_button_1 = self.buttons["R1F Right"]
         r1_roadblock_button_2 = self.buttons["R2A Gate Left"]
@@ -136,6 +162,10 @@ class GlyphsWorld(World):
             "TotalLocations": get_total_locations(self)
         }
 
+        return slot_data
+
+    @staticmethod
+    def interpret_slot_data(slot_data: dict[str, Any]) -> dict[str, Any]:
         return slot_data
 
     def write_spoiler(self, spoiler_handle: TextIO) -> None:
