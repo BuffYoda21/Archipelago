@@ -110,7 +110,6 @@ class RandomShopPrices(Toggle):
 class RandomButtonColorPercent(Range):
     """
     Percent of buttons to randomize the color of.
-    May cause issues with the universal tracker.
     """
     display_name = "Random Button Colors Percent"
     range_start = 0
@@ -136,7 +135,6 @@ class ButtonShardPercent(Range):
     Percent of buttons to be broken and have shards added to the item pool.
     Buttonsanity must be enabled for this to work.
     May be automatically reduced if there are not enough locations in the multiworld.
-    May cause issues with the universal tracker.
     """
     display_name = "Button Shard Percent"
     range_start = 0
