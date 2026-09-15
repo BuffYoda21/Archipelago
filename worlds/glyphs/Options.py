@@ -110,9 +110,6 @@ class RandomShopPrices(Toggle):
 class RandomButtonColorPercent(Range):
     """
     Percent of buttons to randomize the color of.
-    IMPORTANT:
-    This option is known to cause issues with the universal tracker.
-    By enabling it, you accept that it will not be fully reliable.
     """
     display_name = "Random Button Colors Percent"
     range_start = 0
@@ -125,6 +122,24 @@ class ExcludeBlack(Toggle):
     """
     display_name = "No Black Buttons"
     default = False
+
+class ButtonSanity(Toggle):
+    """
+    Adds every button in the game as an item location.
+    """
+    display_name = "Buttonsanity"
+    default = False
+
+class ButtonShardPercent(Range):
+    """
+    Percent of buttons to be broken and have shards added to the item pool.
+    Buttonsanity must be enabled for this to work.
+    May be automatically reduced if there are not enough locations in the multiworld.
+    """
+    display_name = "Button Shard Percent"
+    range_start = 0
+    range_end = 100
+    default = 0
 
 class EnableTraps(Toggle):
     """
@@ -325,6 +340,8 @@ class GlyphsOptions(PerGameCommonOptions):
     RandomShopPrices:           RandomShopPrices
     RandomButtonColorPercent:   RandomButtonColorPercent
     ExcludeBlack:               ExcludeBlack
+    ButtonSanity:               ButtonSanity
+    ButtonShardPercent:         ButtonShardPercent
     EnableTraps:                EnableTraps
     TrapTypes:                  TrapTypes
     HatShuffle:                 HatShuffle
@@ -348,7 +365,7 @@ class GlyphsOptions(PerGameCommonOptions):
 
 glyphs_option_groups: Dict[str, List[Any]] = {
     "Game Options": [Goal, StartingSword, StartingDash, DeathLink],
-    "Randomization Options": [RandomShopPrices, RandomButtonColorPercent, ExcludeBlack, EnableTraps, TrapTypes, HatShuffle],
+    "Randomization Options": [RandomShopPrices, RandomButtonColorPercent, ExcludeBlack, ButtonSanity, ButtonShardPercent, EnableTraps, TrapTypes, HatShuffle],
     "Logical Options": [SwordlessCombat, DashPuzzlesSolved, LogicalWallJumps, FlowerPuzzleSkips],
     "Open Settings": [WizardRequirements, WraithRequirements, WraithSilverCount, WraithGoldCount, WraithSmileCount, WraithRuneCount, WraithGlyphstoneCount],
 }

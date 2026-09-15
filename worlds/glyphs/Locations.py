@@ -1,8 +1,8 @@
-from enum import IntEnum
 from typing import Dict, TYPE_CHECKING
-import logging
 
+from .Util import to_generic_readable_region_name
 from .Types import LocData
+from .Buttons import glyphs_buttons
 
 if TYPE_CHECKING:
     from . import GlyphsWorld
@@ -16,14 +16,17 @@ def get_total_locations(world: "GlyphsWorld") -> int:
     return total
 
 def get_location_names() -> Dict[str, int]:
-    names = {name: data.ap_code for name, data in location_table.items()}
+    names = {name: data.ap_code for name, data in location_table.items() if data.ap_code is not None}
     return names
 
-# Intended to use for YAML options but not currently implemented
 def is_valid_location(world: "GlyphsWorld", name) -> bool:
+    if name in buttonsanity_locations:
+        if world.options.ButtonSanity.value:
+            return True
+        return False
     return True
 
-glyphs_locations = {
+default_locations = {
     # Region 1
     "(R1) Starting Item":                               LocData(1,  "Region 1A"),
     "(R1) Sword Pedestal":                              LocData(2,  "Region 1D"),
@@ -134,6 +137,15 @@ glyphs_locations = {
     "(Void 3) Preminition Reward":                      LocData(87, "Act 3"),
 }
 
+buttonsanity_locations = {
+    f"Button {glyphs_buttons[key].id} ({to_generic_readable_region_name(glyphs_buttons[key].region)})": LocData(
+        glyphs_buttons[key].id + 10000,
+        glyphs_buttons[key].region
+    )
+    for key in glyphs_buttons
+}
+
 location_table = {
-    **glyphs_locations,
+    **default_locations,
+    **buttonsanity_locations,
 }
