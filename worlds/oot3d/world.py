@@ -1,6 +1,7 @@
 from collections.abc import Mapping
 from typing import Any
 
+from Options import get_option_groups
 from worlds.AutoWorld import World
 
 from . import items, locations, regions, rules, web_world
@@ -39,7 +40,12 @@ class OoT3DWorld(World):
         return items.get_random_filler_item_name(self)
     
     def fill_slot_data(self) -> Mapping[str, Any]:
-        # replace these with options once defined
-        return self.options.as_dict(
-            "placeholder"
-        )
+        slot_data: Mapping[str, Any] = {}
+        option_groups = get_option_groups(type(self))
+
+        slot_data["options"] = {
+            group_name: self.options.as_dict(*group_options.keys(), toggles_as_bools=True)
+            for group_name, group_options in option_groups.items()
+        }
+
+        return slot_data
