@@ -33,6 +33,3 @@ def connect_regions(world: OoT3DWorld) -> None:
     spawn_room.connect(placeholder_area, "Spawn to Placeholder Area")
     placeholder_area.connect(placeholder_dungeon, "Placeholder Area to Placeholder Dungeon")
     placeholder_dungeon.connect(finale, "Placeholder Dungeon to Finale")
-
-    #if world.options.placeholder:
-    #    spawn_room.connect(finale, "Finale Skip")
