@@ -23,9 +23,9 @@ def set_all_entrance_rules(world: OoT3DWorld) -> None:
     set_rule(placeholder_area_to_placeholder_dungeon, lambda state: state.has("Dungeon Open", world.player))
     set_rule(placeholder_dungeon_to_finale, lambda state: state.has("Placeholder Item", world.player, 2))
 
-    if world.options.placeholder:
-        spawn_to_finale = world.get_entrance("Finale Skip")
-        set_rule(spawn_to_finale, lambda state: state.has("Placeholder Item", world.player))
+    #if world.options.placeholder:
+    #    spawn_to_finale = world.get_entrance("Finale Skip")
+    #    set_rule(spawn_to_finale, lambda state: state.has("Placeholder Item", world.player))
 
 def set_all_location_rules(world: OoT3DWorld) -> None:
     pass
