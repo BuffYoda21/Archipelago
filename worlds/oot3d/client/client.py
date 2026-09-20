@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Set
 import asyncio
 import traceback
+import json
 from BaseClasses import ItemClassification
 from CommonClient import ClientCommandProcessor, CommonContext, get_base_parser, gui_enabled, logger, server_loop
 from NetUtils import ClientStatus
@@ -84,9 +85,26 @@ class OoT3DClientContext(CommonContext):
     show_citra_connect_message: bool
     show_triple_connected_message: bool
 
-    DATA_VERSION: int = 1
+    DATA_VERSION: int = 4
+    RANDOMIZER_APP_HEADER_LOCATION: int = 0x510000 # may change in the future idk
+
+    # Randomizer App Memory Layout
+    AP_PAYLOAD_SIZE: int  = 64 * 1024
+    # 0-7 (0x00 - 0x07) identifer
+    # 8 (0x08) data version
+    # 9 (0x09) listening flag (0 = app not listening, 1 = app listening)
+    # 10 (0x0A) lock (0 = safe for proxy to write, 1 = safe for app to read)
+    # 11 (0x0B) stage (0 = slot data, 1 = item->location mapping)
+    # 12-15 (0x0C - 0x0F) payload size
+    # 16 (0x10) payload start
+    AP_LOCK_OFFSET: int  = 0x0A
+    AP_STAGE_OFFSET: int  = 0x0B
+    AP_PAYLOAD_SIZE_OFFSET: int  = 0x0C
+    AP_PAYLOAD_OFFSET: int  = 0x10
+
+    # leftover stuff from albw
+    # remove later
     AP_HEADER_LOCATION: int = 0x6fe5f8
-    RANDOMIZER_APP_HEADER_LOCATION: int = 0x4f8000 # may change in the future idk
     SAVES_LOCATION: int = 0x711de8
     EVENTS_LOCATION: int = 0x70b728
     COURSES_LOCATION: int = 0x70c8e0
@@ -172,7 +190,7 @@ class OoT3DClientContext(CommonContext):
         
         elif (await self.interface.read(self.RANDOMIZER_APP_HEADER_LOCATION + 0x9, 1)) == b'\x00': # randomizer app is not listening
             if self.app_connection_status != AppConnectionStatus.WAITING_ON_RANDOMIZER_APP:
-                logger.info("Enter your slot name and select \"Connect and Generate\" in the Randomizer App to send randomizer data")
+                logger.info("Select \"Archipelago Multiworld\" in the Randomizer App to send randomizer data")
                 self.app_connection_status = AppConnectionStatus.WAITING_ON_RANDOMIZER_APP
 
         elif not self.server or self.server.socket.closed:
@@ -181,15 +199,7 @@ class OoT3DClientContext(CommonContext):
                 self.app_connection_status = AppConnectionStatus.WAITING_TO_CONNECT_TO_MULTIWORLD
 
         elif not self.server_connected:
-            if self.app_connection_status != AppConnectionStatus.AUTHENTICATING:
-                recv_slot = (await self.interface.read(self.RANDOMIZER_APP_HEADER_LOCATION + 0x0A, 16)).split(b'\x00', 1)[0].decode()
-                if self.auth != recv_slot:
-                    self.auth = recv_slot
-                    self.app_connection_status = AppConnectionStatus.AUTHENTICATING
-            elif self.app_connection_status != AppConnectionStatus.INVALID_SLOT and not self.authenticating and not self.auth:
-                    self.error("Invalid Slot: Double check your spelling? (\"%s\" does not match any valid slot in the multiworld)" % (self.auth))
-                    self.app_connection_status = AppConnectionStatus.INVALID_SLOT
-                    self.auth = None
+            self.app_connection_status = AppConnectionStatus.AUTHENTICATING
         
         elif not self.slot_data:
             if self.app_connection_status != AppConnectionStatus.WAITING_ON_MULTIWORLD_DATA:
@@ -202,7 +212,35 @@ class OoT3DClientContext(CommonContext):
             await self.send_slot_data()
     
     async def send_slot_data(self) -> None:
-        pass
+        if self.slot_data is None:
+            logger.info("No slot data to send")
+            return
+
+        payload = json.dumps(self.slot_data, separators=(",", ":")).encode("utf-8")
+
+        if len(payload) > self.AP_PAYLOAD_SIZE:
+            raise ValueError(f"Slot data is too large: {len(payload)} bytes (maximum {self.AP_PAYLOAD_SIZE})")
+
+        while (await self.interface.read(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_LOCK_OFFSET, 1)) != b"\x00":
+            await asyncio.sleep(0)
+
+        stage = await self.interface.read_u32(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_STAGE_OFFSET)
+
+        # Clear payload region to prevent stale data.
+        await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_PAYLOAD_OFFSET, bytes(self.AP_PAYLOAD_SIZE))
+
+        # Write payload
+        await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_PAYLOAD_OFFSET, payload)
+
+        # Write payload size
+        await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_PAYLOAD_SIZE_OFFSET, len(payload).to_bytes(4, "little"))
+
+        # may need to refactor later to loop until all data is sent if payloads get too large
+        # right now this just assumes all data fits into a single payload
+        await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_STAGE_OFFSET, bytes([(stage + 1) & 0xFF]))
+
+        # set lock to 1 to tell the app it is safe to read
+        await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_LOCK_OFFSET, b"\x01")
     
     async def validate_save(self) -> None:
         self.save_ptr = 0
@@ -227,13 +265,11 @@ class OoT3DClientContext(CommonContext):
         #     self.error("The patch was created for a different multiworld. Make sure you are using the right patch and connecting to the correct multiworld.")
 
     async def server_auth(self, password_requested: bool = False) -> None:
-        self.authenticating = True
         if password_requested and not self.password:
-            await super(OoT3DClientContext, self).server_auth(password_requested)
-        while not self.auth and not self.exit_event.is_set():
-            await asyncio.sleep(1)
-        await self.send_connect()
-        self.authenticating = False
+            await super().server_auth(password_requested)
+
+        await self.get_username()
+        await self.send_connect(game=self.game)
     
     def on_package(self, cmd: str, args: dict) -> None:
         if cmd == "Connected":
@@ -303,6 +339,13 @@ class OoT3DClientContext(CommonContext):
     
     async def get_null_item(self) -> None:
         pass
+
+    async def disconnect(self, allow_autoreconnect: bool = False) -> None:
+        await super().disconnect(allow_autoreconnect)
+        self.server_connected = False
+        self.slot_data = None
+        self.app_connection_status = AppConnectionStatus.NOT_CONNECTED
+        self.authenticating = False
 
 async def game_watcher(ctx: OoT3DClientContext) -> None:
     global citra
