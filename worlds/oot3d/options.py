@@ -29,9 +29,9 @@ class OpenForest(Choice):
     incompatible with starting as adult.
     """
     display_name = "Forest"
+    option_closed = 0
     option_open = 1
     option_closed_deku = 2
-    option_closed = 3
     default = option_open
 
 class OpenKakarikoGate(Choice):
@@ -48,8 +48,8 @@ class OpenKakarikoGate(Choice):
     in Kakariko.
     """
     display_name = "Kakariko Gate"
+    option_closed = 0
     option_open = 1
-    option_closed = 2
     default = option_closed
 
 class OpenDoorOfTime(Choice):
@@ -68,9 +68,9 @@ class OpenDoorOfTime(Choice):
     open the Door of Time.
     """
     display_name = "Door of Time"
-    option_open = 1
-    option_closed = 2
-    option_intended = 3
+    option_open = 0
+    option_closed = 1
+    option_intended = 2
     default = option_open
 
 class OpenZorasFountain(Choice):
@@ -91,9 +91,9 @@ class OpenZorasFountain(Choice):
     the pool since it can't be used.
     """
     display_name = "Zora's Fountain"
-    option_normal = 1
-    option_adult = 2
-    option_open = 3
+    option_normal = 0
+    option_adult = 1
+    option_open = 2
     default = option_normal
 
 class OpenJabuJabu(Choice):
@@ -106,8 +106,8 @@ class OpenJabuJabu(Choice):
     fed.
     """
     display_name = "Jabu-Jabu"
+    option_closed = 0
     option_open = 1
-    option_closed = 2
     default = option_closed
 
 class OpenGerudoFortress(Choice):
@@ -126,9 +126,9 @@ class OpenGerudoFortress(Choice):
     Grounds.
     """
     display_name = "Gerudo Fortress"
-    option_normal = 1
-    option_fast = 2
-    option_open = 3
+    option_normal = 0
+    option_fast = 1
+    option_open = 2
     default = option_normal
 
 class OpenRainbowBridge(Choice):
@@ -154,14 +154,14 @@ class OpenRainbowBridge(Choice):
     into the blue warp at the end of them.
     """
     display_name = "Rainbow Bridge"
-    option_open = 1
-    option_vanilla = 2
-    option_stones = 3
-    option_medallions = 4
-    option_rewards = 5
-    option_dungeons = 6
-    option_tokens = 7
-    option_hearts = 8
+    option_open = 0
+    option_vanilla = 1
+    option_stones = 2
+    option_medallions = 3
+    option_rewards = 4
+    option_dungeons = 5
+    option_tokens = 6
+    option_hearts = 7
     default = option_medallions
 
 class BridgeStoneCount(Range):
@@ -259,8 +259,8 @@ class StartingAge(Choice):
     start with an ocarina already in your inventory.
     """
     display_name = "Starting Age"
+    option_adult = 0
     option_child = 1
-    option_adult = 2
     default = option_child
 
 class ShuffleEntrances(Toggle):
@@ -286,9 +286,9 @@ class ShuffleDungeonEntrances(Choice):
     Ground are opened for both adult and child.
     """
     display_name = "Shuffle Dungeon Entrances"
-    option_off = 1
-    option_on = 2
-    option_on_plus_ganon = 3
+    option_off = 0
+    option_on = 1
+    option_on_plus_ganon = 2
     default = option_off
 
     @classmethod
@@ -310,9 +310,9 @@ class ShuffleBossEntrances(Choice):
     and/or Bongo Bongo.
     """
     display_name = "Shuffle Boss Entrances"
-    option_off = 1
-    option_age_restricted = 2
-    option_full = 3
+    option_off = 0
+    option_age_restricted = 1
+    option_full = 2
     default = option_off
 
 class ShuffleOverworldEntrances(Choice):
@@ -328,8 +328,8 @@ class ShuffleOverworldEntrances(Choice):
       are decoupled)
     """
     display_name = "Shuffle Overworld Entrances"
-    option_off = 1
-    option_on = 2
+    option_off = 0
+    option_on = 1
     default = option_off
 
 class ShuffleInteriorEntrances(Choice):
@@ -350,9 +350,9 @@ class ShuffleInteriorEntrances(Choice):
     - Kakariko Potion Shop.
     """
     display_name = "Shuffle Interior Entrances"
-    option_off = 1
-    option_simple = 2
-    option_all = 3
+    option_off = 0
+    option_simple = 1
+    option_all = 2
     default = option_off
 
 class ShuffleGrottosEntrances(Choice):
@@ -362,8 +362,8 @@ class ShuffleGrottosEntrances(Choice):
     Woods Stage.
     """
     display_name = "Shuffle Grottos Entrances"
-    option_off = 1
-    option_on = 2
+    option_off = 0
+    option_on = 1
     default = option_off
 
 class ShuffleOwlDrops(Choice):
@@ -373,8 +373,8 @@ class ShuffleOwlDrops(Choice):
     the top of Death Mountain Trail.
     """
     display_name = "Shuffle Owl Drops"
-    option_off = 1
-    option_on = 2
+    option_off = 0
+    option_on = 1
     default = option_off
 
 class ShuffleWarpSongs(Choice):
@@ -382,8 +382,8 @@ class ShuffleWarpSongs(Choice):
     Randomize where each of the 6 warp songs leads to.
     """
     display_name = "Shuffle Warp Songs"
-    option_off = 1
-    option_on = 2
+    option_off = 0
+    option_on = 1
     default = option_off
 
 class ShuffleOverworldSpawns(Choice):
@@ -397,8 +397,8 @@ class ShuffleOverworldSpawns(Choice):
     game again.
     """
     display_name = "Shuffle Overworld Spawns"
-    option_off = 1
-    option_on = 2
+    option_off = 0
+    option_on = 1
     default = option_off
 
 class MixedEntrancePools(Toggle):
@@ -486,9 +486,9 @@ class AmmoDrops(Choice):
     Ammo upgrades will only refill ammo by 10 units.
     """
     display_name = "Ammo Drops"
-    option_on = 1
-    option_on_plus_bombchu = 2
-    option_off = 3
+    option_on = 0
+    option_on_plus_bombchu = 1
+    option_off = 2
     default = option_on_plus_bombchu
 
     @classmethod
@@ -520,10 +520,10 @@ class HeartDropsAndRefills(Choice):
     Fairies heal Link by only 3 hearts.
     """
     display_name = "Heart Drops and Refills"
-    option_on = 1
-    option_no_drop = 2
-    option_no_refill = 3
-    option_off = 4
+    option_on = 0
+    option_no_drop = 1
+    option_no_refill = 2
+    option_off = 3
     default = option_on
 
 class MQDungeonCount(Range):
@@ -680,9 +680,9 @@ its vanilla enemy.
 
 class RandomizedEnemy(Choice):
     __doc__ = random_enemy_docstring
-    option_randomized = 1
-    option_vanilla = 2
-    option_removed = 3
+    option_randomized = 0
+    option_vanilla = 1
+    option_removed = 2
     default = option_randomized
 
     def __init_subclass__(cls, **kwargs):
@@ -890,10 +890,10 @@ class ShuffleDungeonRewards(Choice):
     anywhere."
     """
     display_name = "Shuffle Dungeon Rewards"
-    option_end_of_dungeon = 1
-    option_any_dungeon = 2
-    option_overworld = 3
-    option_anywhere = 4
+    option_end_of_dungeon = 0
+    option_any_dungeon = 1
+    option_overworld = 2
+    option_anywhere = 3
     default = option_end_of_dungeon
 
 class LinksPocket(Choice):
@@ -914,10 +914,10 @@ class LinksPocket(Choice):
     Link will start with a very useful green rupee.
     """
     display_name = "Link's Pocket"
-    option_dungeon_reward = 1
-    option_advancement = 2
-    option_anything = 3
-    option_nothing = 4
+    option_dungeon_reward = 0
+    option_advancement = 1
+    option_anything = 2
+    option_nothing = 3
     default = option_dungeon_reward
 
 class ShuffleSongs(Choice):
@@ -939,9 +939,9 @@ class ShuffleSongs(Choice):
     Songs can appear in any location.
     """
     display_name = "Shuffle Songs"
-    option_song_locations = 1
-    option_dungeon_rewards = 2
-    option_anywhere = 3
+    option_song_locations = 0
+    option_dungeon_rewards = 1
+    option_anywhere = 2
     default = option_song_locations
 
 class Shopsanity(NamedRange):
@@ -964,7 +964,7 @@ class Shopsanity(NamedRange):
     range_end = 4
     special_range_names = {
         "off": -1,
-        "random per shop": -2,
+        "random per shop": 5,
     }
     default = -1
 
@@ -1163,6 +1163,14 @@ class ShuffleMerchants(Choice):
     option_on_with_hints = 2
     default = option_off
 
+    @classmethod
+    def get_option_name(cls, value: T) -> str: # type: ignore
+        if value == cls.option_on_no_hints:
+            return "On (No Hints)"
+        elif value == cls.option_on_with_hints:
+            return "On (With Hints)"
+        return super().get_option_name(value) # type: ignore
+
 class ShuffleAdultTrade(Toggle):
     """
     Enabling this adds all of the adult trade quest
@@ -1306,12 +1314,12 @@ class ShuffleMapsAndCompasses(Choice):
     world.
     """
     display_name = "Maps/Compasses"
-    option_start_with = 1
-    option_vanilla = 2
-    option_own_dungeon = 3
-    option_any_dungeon = 4
-    option_overworld = 5
-    option_anywhere = 6
+    option_start_with = 0
+    option_vanilla = 1
+    option_own_dungeon = 2
+    option_any_dungeon = 3
+    option_overworld = 4
+    option_anywhere = 5
     default = option_own_dungeon
 
 class ShuffleSmallKeys(Choice):
@@ -1350,12 +1358,12 @@ class ShuffleSmallKeys(Choice):
     enter a dungeon multiple times.
     """
     display_name = "Small Keys"
-    option_start_with = 1
-    option_vanilla = 2
-    option_own_dungeon = 3
-    option_any_dungeon = 4
-    option_overworld = 5
-    option_anywhere = 6
+    option_start_with = 0
+    option_vanilla = 1
+    option_own_dungeon = 2
+    option_any_dungeon = 3
+    option_overworld = 4
+    option_anywhere = 5
     default = option_own_dungeon
 
 class ShuffleGerudoFortressKeys(Choice):
@@ -1379,10 +1387,10 @@ class ShuffleGerudoFortressKeys(Choice):
     world.
     """
     display_name = "Gerudo Fortress Keys"
-    option_vanilla = 1
-    option_any_dungeon = 2
-    option_overworld = 3
-    option_anywhere = 4
+    option_vanilla = 0
+    option_any_dungeon = 1
+    option_overworld = 2
+    option_anywhere = 3
     default = option_vanilla
 
 class ShuffleBossKeys(Choice):
@@ -1417,12 +1425,12 @@ class ShuffleBossKeys(Choice):
     enter a dungeon multiple times.
     """
     display_name = "Boss Keys"
-    option_start_with = 1
-    option_vanilla = 2
-    option_own_dungeon = 3
-    option_any_dungeon = 4
-    option_overworld = 5
-    option_anywhere = 6
+    option_start_with = 0
+    option_vanilla = 1
+    option_own_dungeon = 2
+    option_any_dungeon = 3
+    option_overworld = 4
+    option_anywhere = 5
     default = option_own_dungeon
 
 class ShuffleGanonsBossKey(Choice):
@@ -1457,19 +1465,19 @@ class ShuffleGanonsBossKey(Choice):
     adult, with differing requirements.
     """
     display_name = "Ganon's Boss Key"
-    option_start_with = 1
-    option_vanilla = 2
-    option_own_dungeon = 3
-    option_any_dungeon = 4
-    option_overworld = 5
-    option_anywhere = 6
-    option_LACS_vanilla = 7
-    option_LACS_medallions = 8
-    option_LACS_stones = 9
-    option_LACS_rewards = 10
-    option_LACS_dungeons = 11
-    option_LACS_tokens = 12
-    option_LACS_hearts = 13
+    option_start_with = 0
+    option_vanilla = 1
+    option_own_dungeon = 2
+    option_any_dungeon = 3
+    option_overworld = 4
+    option_anywhere = 5
+    option_LACS_vanilla = 6
+    option_LACS_medallions = 7
+    option_LACS_stones = 8
+    option_LACS_rewards = 9
+    option_LACS_dungeons = 10
+    option_LACS_tokens = 11
+    option_LACS_hearts = 12
     default = option_own_dungeon
 
 class LACSMedallionCount(Range):
@@ -1696,9 +1704,9 @@ class Logic(Choice):
     interact with archipelago at all ¯\\_(ツ)_/¯
     """
     display_name = "Logic"
-    option_glitchless = 1
-    option_glitched = 2
-    option_no_logic = 3
+    option_glitchless = 0
+    option_glitched = 1
+    option_no_logic = 2
     default = option_glitchless
 
 class NightSkultullasExpectSun(Toggle):
@@ -2581,10 +2589,10 @@ class ItemPool(Choice):
     upgrades.
     """
     display_name = "Item Pool"
-    option_balanced = 0
-    option_plentiful = 1
-    option_minimal = 2
-    option_scarce = 3
+    option_minimal = 0
+    option_scarce = 1
+    option_balanced = 2
+    option_plentiful = 3
     default = option_balanced
 
 class IceTraps(Choice):
@@ -3124,14 +3132,14 @@ class OoT3DOptions(PerGameCommonOptions):
 
     # Shuffle Settings
     shuffle_dungeon_rewards:         ShuffleDungeonRewards
-    link_s_pocket:                   LinksPocket
+    links_pocket:                    LinksPocket
     shuffle_songs:                   ShuffleSongs
     shopsanity:                      Shopsanity
     shopsanity_prices:               ShopsanityPrices
     tokensanity:                     Tokensanity
     scrub_shuffle:                   ScrubShuffle
     shuffle_cows:                    ShuffleCows
-    shuffle_korok_sword:             ShuffleKokiriSword
+    shuffle_kokiri_sword:            ShuffleKokiriSword
     shuffle_master_sword:            ShuffleMasterSword
     shuffle_ocarinas:                ShuffleOcarinas
     shuffle_weird_egg:               ShuffleWeirdEgg
