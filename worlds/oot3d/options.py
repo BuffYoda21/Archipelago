@@ -2,11 +2,23 @@ from dataclasses import dataclass
 
 from Options import T, Choice, NamedRange, OptionGroup, OptionSet, PerGameCommonOptions, Range, Toggle
 
+class OoT3DChoice(Choice):
+    xml_name: str | None = None
+
+class OoT3DRange(Range):
+    xml_name: str | None = None
+
+class OoT3DToggle(Toggle):
+    xml_name: str | None = None
+
+class OoT3DNamedRange(NamedRange):
+    xml_name: str | None = None
+
 #################
 # Open Settings #
 #################
 
-class OpenForest(Choice):
+class OpenForest(OoT3DChoice):
     """
     Open:
     Mido no longer blocks the path to the Deku Tree,
@@ -34,7 +46,7 @@ class OpenForest(Choice):
     option_closed_deku = 2
     default = option_open
 
-class OpenKakarikoGate(Choice):
+class OpenKakarikoGate(OoT3DChoice):
     """
     Open:
     The gate is always open instead of needing
@@ -52,7 +64,7 @@ class OpenKakarikoGate(Choice):
     option_open = 1
     default = option_closed
 
-class OpenDoorOfTime(Choice):
+class OpenDoorOfTime(OoT3DChoice):
     """
     Open:
     The Door of Time starts opened instead of needing
@@ -73,7 +85,7 @@ class OpenDoorOfTime(Choice):
     option_intended = 2
     default = option_open
 
-class OpenZorasFountain(Choice):
+class OpenZorasFountain(OoT3DChoice):
     """
     Normal:
     King Zora obstructs the way to Zora's Fountain.
@@ -96,7 +108,7 @@ class OpenZorasFountain(Choice):
     option_open = 2
     default = option_normal
 
-class OpenJabuJabu(Choice):
+class OpenJabuJabu(OoT3DChoice):
     """
     Open:
     Jabu-Jabu's mouth is always open.
@@ -110,7 +122,7 @@ class OpenJabuJabu(Choice):
     option_open = 1
     default = option_closed
 
-class OpenGerudoFortress(Choice):
+class OpenGerudoFortress(OoT3DChoice):
     """
     Normal:
     All 4 carpenters can be rescued.
@@ -131,7 +143,7 @@ class OpenGerudoFortress(Choice):
     option_open = 2
     default = option_normal
 
-class OpenRainbowBridge(Choice):
+class OpenRainbowBridge(OoT3DChoice):
     """
     Open:
     The Rainbow Bridge is always present.
@@ -164,68 +176,74 @@ class OpenRainbowBridge(Choice):
     option_hearts = 7
     default = option_medallions
 
-class BridgeStoneCount(Range):
+class BridgeStoneCount(OoT3DRange):
     """
     Set the number of Spiritual Stones required to
     spawn the Rainbow Bridge.
     """
     display_name = "Rainbow Bridge Stone Count"
+    xml_name = "Stone Count"
     range_start = 0
     range_end = 3
     default = 3
 
-class BridgeMedallionCount(Range):
+class BridgeMedallionCount(OoT3DRange):
     """
     Set the number of Medallions required to spawn
     the Rainbow Bridge.
     """
     display_name = "Rainbow Bridge Medallion Count"
+    xml_name = "Medallion Count"
     range_start = 0
     range_end = 6
     default = 6
 
-class BridgeDungeonRewardsCount(Range):
+class BridgeDungeonRewardsCount(OoT3DRange):
     """
     Set the number of Dungeon Rewards (Spiritual
     Stones and Medallions) required to spawn the
     Rainbow Bridge.
     """
     display_name = "Rainbow Bridge Dungeon Reward Count"
+    xml_name = "Reward Count"
     range_start = 0
     range_end = 9
     default = 9
 
-class BridgeDungeonCount(Range):
+class BridgeDungeonCount(OoT3DRange):
     """
     Set the number of completed dungeons required to
     spawn the Rainbow Bridge.
     """
     display_name = "Rainbow Bridge Dungeon Count"
+    xml_name = "Dungeon Count"
     range_start = 0
     range_end = 8
     default = 8
 
-class BridgeTokenCount(Range):
+class BridgeTokenCount(OoT3DRange):
     """
     Set the number of Gold Skulltula Tokens required
     to spawn the Rainbow Bridge.
     """
     display_name = "Rainbow Bridge Token Count"
+    xml_name = "Token Count"
     range_start = 0
     range_end = 100
     default = 100
 
-class BridgeHeartCount(Range):
+class BridgeHeartCount(OoT3DRange):
     """
     Set the number of Hearts required to spawn the
     Rainbow Bridge.
     """
     display_name = "Rainbow Bridge Heart Count"
+    xml_name = "Heart Count"
     range_start = 0
     range_end = 20
     default = 20
 
-class RandomGanonsTrials(Toggle):
+class RandomGanonsTrials(OoT3DToggle):
     """
     Sets a random number of required trials to enter
     Ganon's Tower.
@@ -233,7 +251,7 @@ class RandomGanonsTrials(Toggle):
     display_name = "Random Ganon's Trials"
     default = True
 
-class TrialCount(Range):
+class TrialCount(OoT3DRange):
     """
     Set the number of trials required to enter
     Ganon's Tower. Trials will be randomly selected.
@@ -247,7 +265,7 @@ class TrialCount(Range):
 # World Settings #
 ##################
 
-class StartingAge(Choice):
+class StartingAge(OoT3DChoice):
     """
     Choose which age Link will start as.
     
@@ -263,7 +281,7 @@ class StartingAge(Choice):
     option_child = 1
     default = option_child
 
-class ShuffleEntrances(Toggle):
+class ShuffleEntrances(OoT3DToggle):
     """
     Shuffle where the entrances between areas lead to
     If turned on, select which kinds of entrances you
@@ -274,7 +292,7 @@ class ShuffleEntrances(Toggle):
     display_name = "Shuffle Entrances"
     default = False
 
-class ShuffleDungeonEntrances(Choice):
+class ShuffleDungeonEntrances(OoT3DChoice):
     """
     Shuffle the pool of dungeon entrances, including
     Bottom of the Well, Ice Cavern, and Gerudo
@@ -286,6 +304,7 @@ class ShuffleDungeonEntrances(Choice):
     Ground are opened for both adult and child.
     """
     display_name = "Shuffle Dungeon Entrances"
+    xml_name = "Dungeon Entrances"
     option_off = 0
     option_on = 1
     option_on_plus_ganon = 2
@@ -298,7 +317,7 @@ class ShuffleDungeonEntrances(Choice):
         return super().get_option_name(value) # type: ignore
         
 
-class ShuffleBossEntrances(Choice):
+class ShuffleBossEntrances(OoT3DChoice):
     """
     Shuffle the pool of dungeon boss entrances.
     This affects the boss rooms of all stone and
@@ -310,12 +329,13 @@ class ShuffleBossEntrances(Choice):
     and/or Bongo Bongo.
     """
     display_name = "Shuffle Boss Entrances"
+    xml_name = "Boss Entrances"
     option_off = 0
     option_age_restricted = 1
     option_full = 2
     default = option_off
 
-class ShuffleOverworldEntrances(Choice):
+class ShuffleOverworldEntrances(OoT3DChoice):
     """
     Shuffle the pool of Overworld entrances, which
     corresponds to almost all loading zones between
@@ -328,11 +348,12 @@ class ShuffleOverworldEntrances(Choice):
       are decoupled)
     """
     display_name = "Shuffle Overworld Entrances"
+    xml_name = "Overworld Entrances"
     option_off = 0
     option_on = 1
     default = option_off
 
-class ShuffleInteriorEntrances(Choice):
+class ShuffleInteriorEntrances(OoT3DChoice):
     """
     Off:
     Interior entrances will not be shuffled.
@@ -350,43 +371,47 @@ class ShuffleInteriorEntrances(Choice):
     - Kakariko Potion Shop.
     """
     display_name = "Shuffle Interior Entrances"
+    xml_name = "Interior Entrances"
     option_off = 0
     option_simple = 1
     option_all = 2
     default = option_off
 
-class ShuffleGrottosEntrances(Choice):
+class ShuffleGrottosEntrances(OoT3DChoice):
     """
     Shuffle the pool of grotto entrances, including
     all graves, small Fairy Fountains and the Lost
     Woods Stage.
     """
     display_name = "Shuffle Grottos Entrances"
+    xml_name = "Grottos Entrances"
     option_off = 0
     option_on = 1
     default = option_off
 
-class ShuffleOwlDrops(Choice):
+class ShuffleOwlDrops(OoT3DChoice):
     """
     Randomize where Kaepora Gaebora (the Owl) drops
     you at when you talk to him at Lake Hylia or at
     the top of Death Mountain Trail.
     """
     display_name = "Shuffle Owl Drops"
+    xml_name = "Owl Drops"
     option_off = 0
     option_on = 1
     default = option_off
 
-class ShuffleWarpSongs(Choice):
+class ShuffleWarpSongs(OoT3DChoice):
     """
     Randomize where each of the 6 warp songs leads to.
     """
     display_name = "Shuffle Warp Songs"
+    xml_name = "Warp Songs"
     option_off = 0
     option_on = 1
     default = option_off
 
-class ShuffleOverworldSpawns(Choice):
+class ShuffleOverworldSpawns(OoT3DChoice):
     """
     Randomize where you start as Child or Adult when
     loading a save in the Overworld. This means you
@@ -397,11 +422,12 @@ class ShuffleOverworldSpawns(Choice):
     game again.
     """
     display_name = "Shuffle Overworld Spawns"
+    xml_name = "Overworld Spawns"
     option_off = 0
     option_on = 1
     default = option_off
 
-class MixedEntrancePools(Toggle):
+class MixedEntrancePools(OoT3DToggle):
     """
     Shuffle entrances into a mixed pool instead of
     separate ones. For example, enabling the settings
@@ -415,14 +441,14 @@ class MixedEntrancePools(Toggle):
     display_name = "Mixed Entrance Pools"
     default = False
 
-class MixDungeons(Toggle):
+class MixDungeons(OoT3DToggle):
     """
     Dungeon entrances will be part of the mixed pool.
     """
     display_name = "Mix Dungeons"
     default = False
 
-class MixOverworld(Toggle):
+class MixOverworld(OoT3DToggle):
     """
     Overworld entrances will be part of the mixed
     pool.
@@ -430,21 +456,21 @@ class MixOverworld(Toggle):
     display_name = "Mix Overworld"
     default = False
 
-class MixInterior(Toggle):
+class MixInterior(OoT3DToggle):
     """
     Interior entrances will be part of the mixed pool.
     """
     display_name = "Mix Interior"
     default = False
 
-class MixGrottos(Toggle):
+class MixGrottos(OoT3DToggle):
     """
     Grotto entrances will be part of the mixed pool.
     """
     display_name = "Mix Grottos"
     default = False
 
-class DecoupleEntrances(Toggle):
+class DecoupleEntrances(OoT3DToggle):
     """
     Decouple entrances when shuffling them. This means
     you are no longer guaranteed to end up back where
@@ -458,7 +484,7 @@ class DecoupleEntrances(Toggle):
     display_name = "Decouple Entrances"
     default = False
 
-class BombchusInLogic(Toggle):
+class BombchusInLogic(OoT3DToggle):
     """
     Bombchus are properly considered in logic.
     They can be replenished in shops, or through
@@ -469,7 +495,7 @@ class BombchusInLogic(Toggle):
     display_name = "Bombchus in Logic"
     default = False
 
-class AmmoDrops(Choice):
+class AmmoDrops(OoT3DChoice):
     """
     On:
     Bombs, arrows, seeds, nuts, sticks and
@@ -497,7 +523,7 @@ class AmmoDrops(Choice):
             return "On + Bombchu"
         return super().get_option_name(value) # type: ignore
 
-class HeartDropsAndRefills(Choice):
+class HeartDropsAndRefills(OoT3DChoice):
     """
     On:
     Heart drops will appear as normal.
@@ -526,7 +552,7 @@ class HeartDropsAndRefills(Choice):
     option_off = 3
     default = option_on
 
-class MQDungeonCount(Range):
+class MQDungeonCount(OoT3DRange):
     """
     Specify the number of Master Quest dungeons to
     appear in the game. Which dungeons become Master
@@ -537,7 +563,7 @@ class MQDungeonCount(Range):
     range_end = 12
     default = 0
 
-class SetDungeonTypes(Toggle):
+class SetDungeonTypes(OoT3DToggle):
     """
     If set, you can choose specific dungeons to be
     vanilla, MQ, or random
@@ -545,79 +571,91 @@ class SetDungeonTypes(Toggle):
     display_name = "Set Dungeon Types"
     default = False
 
-class DekuTreeDungeonType(Choice):
+class DekuTreeDungeonType(OoT3DChoice):
     display_name = "Deku Tree Dungeon Type"
+    xml_name = "Deku Tree"
     option_vanilla = 0
     option_master_quest = 1
     default = "random"
 
-class DodongosCavernDungeonType(Choice):
+class DodongosCavernDungeonType(OoT3DChoice):
     display_name = "Dodongo's Cavern Dungeon Type"
+    xml_name = "Dodongo's Cavern"
     option_vanilla = 0
     option_master_quest = 1
     default = "random"
 
-class JabuJabusBellyDungeonType(Choice):
-    display_name = "Jabu Jabu's Belly Dungeon Type"
+class JabuJabusBellyDungeonType(OoT3DChoice):
+    display_name = "Jabu-Jabu's Belly Dungeon Type"
+    xml_name = "Jabu-Jabu's Belly"
     option_vanilla = 0
     option_master_quest = 1
     default = "random"
 
-class ForestTempleDungeonType(Choice):
+class ForestTempleDungeonType(OoT3DChoice):
     display_name = "Forest Temple Dungeon Type"
+    xml_name = "Forest Temple"
     option_vanilla = 0
     option_master_quest = 1
     default = "random"
 
-class FireTempleDungeonType(Choice):
+class FireTempleDungeonType(OoT3DChoice):
     display_name = "Fire Temple Dungeon Type"
+    xml_name = "Fire Temple"
     option_vanilla = 0
     option_master_quest = 1
     default = "random"
 
-class WaterTempleDungeonType(Choice):
+class WaterTempleDungeonType(OoT3DChoice):
     display_name = "Water Temple Dungeon Type"
+    xml_name = "Water Temple"
     option_vanilla = 0
     option_master_quest = 1
     default = "random"
 
-class SpiritTempleDungeonType(Choice):
+class SpiritTempleDungeonType(OoT3DChoice):
     display_name = "Spirit Temple Dungeon Type"
+    xml_name = "Spirit Temple"
     option_vanilla = 0
     option_master_quest = 1
     default = "random"
 
-class ShadowTempleDungeonType(Choice):
+class ShadowTempleDungeonType(OoT3DChoice):
     display_name = "Shadow Temple Dungeon Type"
+    xml_name = "Shadow Temple"
     option_vanilla = 0
     option_master_quest = 1
     default = "random"
 
-class BottomOfTheWellDungeonType(Choice):
+class BottomOfTheWellDungeonType(OoT3DChoice):
     display_name = "Bottom of the Well Dungeon Type"
+    xml_name = "Bottom of the Well"
     option_vanilla = 0
     option_master_quest = 1
     default = "random"
 
-class IceCavernDungeonType(Choice):
+class IceCavernDungeonType(OoT3DChoice):
     display_name = "Ice Cavern Dungeon Type"
+    xml_name = "Ice Cavern"
     option_vanilla = 0
     option_master_quest = 1
     default = "random"
 
-class TrainingGroundsDungeonType(Choice):
+class TrainingGroundsDungeonType(OoT3DChoice):
     display_name = "Training Grounds Dungeon Type"
+    xml_name = "Training Grounds"
     option_vanilla = 0
     option_master_quest = 1
     default = "random"
 
-class GanonsCastleDungeonType(Choice):
+class GanonsCastleDungeonType(OoT3DChoice):
     display_name = "Ganon's Castle Dungeon Type"
+    xml_name = "Ganon's Castle"
     option_vanilla = 0
     option_master_quest = 1
     default = "random"
 
-class TriforceHunt(Toggle):
+class TriforceHunt(OoT3DToggle):
     """
     Pieces of the Triforce have been scattered around
     the world. Find some of them to beat the game.
@@ -628,22 +666,24 @@ class TriforceHunt(Toggle):
     display_name = "Triforce Hunt"
     default = False
 
-class TriforcePieces(Range):
+class TriforcePieces(OoT3DRange):
     """
     Set the total number of pieces that will appear
     in the world.
     """
     display_name = "Total Triforce Pieces"
+    xml_name = "Total Pieces"
     range_start = 1
     range_end = 200
     default = 30
 
-class RequiredTriforcePieces(Range):
+class RequiredTriforcePieces(OoT3DRange):
     """
     Set the number of pieces required to beat the
     game.
     """
     display_name = "Required Triforce Pieces"
+    xml_name = "Required Pieces"
     range_start = 1
     range_end = 100
     default = 20
@@ -652,7 +692,7 @@ class RequiredTriforcePieces(Range):
 # Enemy Randomizer #
 ####################
 
-class EnemyRandomizer(Toggle):
+class EnemyRandomizer(OoT3DToggle):
     """
     Randomize most enemies in the game.
     WARNING: Incompatible with Master Quest Logic.
@@ -678,7 +718,7 @@ are removed, that location will revert to using
 its vanilla enemy.
 """
 
-class RandomizedEnemy(Choice):
+class RandomizedEnemy(OoT3DChoice):
     __doc__ = random_enemy_docstring
     option_randomized = 0
     option_vanilla = 1
@@ -868,7 +908,7 @@ class Wolfos(RandomizedEnemy):
 # Shuffle Settings #
 ####################
 
-class ShuffleDungeonRewards(Choice):
+class ShuffleDungeonRewards(OoT3DChoice):
     """
     End of Dungeon:
     Medallions and Spiritual Stones will be given as
@@ -896,7 +936,7 @@ class ShuffleDungeonRewards(Choice):
     option_anywhere = 3
     default = option_end_of_dungeon
 
-class LinksPocket(Choice):
+class LinksPocket(OoT3DChoice):
     """
     Dungeon Reward:
     Link will start with a Dungeon Reward in his
@@ -920,7 +960,7 @@ class LinksPocket(Choice):
     option_nothing = 3
     default = option_dungeon_reward
 
-class ShuffleSongs(Choice):
+class ShuffleSongs(OoT3DChoice):
     """
     Song Locations:
     Songs will only appear at locations that normally
@@ -944,7 +984,7 @@ class ShuffleSongs(Choice):
     option_anywhere = 2
     default = option_song_locations
 
-class Shopsanity(NamedRange):
+class Shopsanity(OoT3DNamedRange):
     """
     Off:
     All shop items will be the same as vanilla.
@@ -968,7 +1008,7 @@ class Shopsanity(NamedRange):
     }
     default = -1
 
-class ShopsanityPrices(Choice):
+class ShopsanityPrices(OoT3DChoice):
     """
     Random Price:
     Prices of shuffled shop items are random
@@ -1002,7 +1042,7 @@ class ShopsanityPrices(Choice):
     option_tycoon = 5
     default = option_random_price
 
-class Tokensanity(Choice):
+class Tokensanity(OoT3DChoice):
     """
     Off:
     GS locations will not be shuffled.
@@ -1028,7 +1068,7 @@ class Tokensanity(Choice):
     option_all_tokens = 3
     default = option_off
 
-class ScrubShuffle(Choice):
+class ScrubShuffle(OoT3DChoice):
     """
     Off:
     Only the 3 Scrubs that give one-time items in the
@@ -1054,7 +1094,7 @@ class ScrubShuffle(Choice):
     option_random_prices = 3
     default = option_off
 
-class ShuffleCows(Toggle):
+class ShuffleCows(OoT3DToggle):
     """
     Enabling this will let cows give you items upon
     performing Epona's song in front of them. There
@@ -1063,7 +1103,7 @@ class ShuffleCows(Toggle):
     display_name = "Shuffle Cows"
     default = False
 
-class ShuffleKokiriSword(Toggle):
+class ShuffleKokiriSword(OoT3DToggle):
     """
     Enabling this shuffles the Kokiri Sword into the
     item pool.
@@ -1074,7 +1114,7 @@ class ShuffleKokiriSword(Toggle):
     display_name = "Shuffle Kokiri Sword"
     default = False
 
-class ShuffleMasterSword(Toggle):
+class ShuffleMasterSword(OoT3DToggle):
     """
     Enabling this shuffles the Master Sword into the
     item pool.
@@ -1087,7 +1127,7 @@ class ShuffleMasterSword(Toggle):
     display_name = "Shuffle Master Sword"
     default = False
 
-class ShuffleOcarinas(Toggle):
+class ShuffleOcarinas(OoT3DToggle):
     """
     Enabling this shuffles the Fairy Ocarina and the
     Ocarina of Time into the item pool.
@@ -1098,7 +1138,7 @@ class ShuffleOcarinas(Toggle):
     display_name = "Shuffle Ocarinas"
     default = False
 
-class ShuffleWeirdEgg(Toggle):
+class ShuffleWeirdEgg(OoT3DToggle):
     """
     Enabling this shuffles the Weird Egg from Malon
     into the item pool.
@@ -1109,7 +1149,7 @@ class ShuffleWeirdEgg(Toggle):
     display_name = "Shuffle Weird Egg"
     default = False
 
-class ShuffleZeldasLetter(Toggle):
+class ShuffleZeldasLetter(OoT3DToggle):
     """
     Enabling this shuffles Zelda's Letter into the
     item pool.
@@ -1120,7 +1160,7 @@ class ShuffleZeldasLetter(Toggle):
     display_name = "Shuffle Zelda's Letter"
     default = False
 
-class ShuffleGerudoToken(Toggle):
+class ShuffleGerudoToken(OoT3DToggle):
     """
     Enabling this shuffles the Gerudo Token into the
     item pool.
@@ -1131,7 +1171,7 @@ class ShuffleGerudoToken(Toggle):
     display_name = "Shuffle Gerudo Token"
     default = False
 
-class ShuffleMagicBeans(Toggle):
+class ShuffleMagicBeans(OoT3DToggle):
     """
     Enabling this adds a pack of 10 beans to the item
     pool and changes the Magic Bean Salesman to sell a
@@ -1140,7 +1180,7 @@ class ShuffleMagicBeans(Toggle):
     display_name = "Shuffle Magic Beans"
     default = False
 
-class ShuffleMerchants(Choice):
+class ShuffleMerchants(OoT3DChoice):
     """
     Off:
     Enabling this changes Medigoron, Granny and the
@@ -1171,7 +1211,7 @@ class ShuffleMerchants(Choice):
             return "On (With Hints)"
         return super().get_option_name(value) # type: ignore
 
-class ShuffleAdultTrade(Toggle):
+class ShuffleAdultTrade(OoT3DToggle):
     """
     Enabling this adds all of the adult trade quest
     items to the pool, each of which can be traded
@@ -1184,7 +1224,7 @@ class ShuffleAdultTrade(Toggle):
     display_name = "Shuffle Adult Trade"
     default = False
 
-class ShuffleChestMinigame(Choice):
+class ShuffleChestMinigame(OoT3DChoice):
     """
     The 5 key chests in the Treasure Chest Shop will
     be randomized, and the 6 keys will be added to the
@@ -1209,7 +1249,7 @@ class ShuffleChestMinigame(Choice):
             return "On (Pack)"
         return super().get_option_name(value) # type: ignore
 
-class ShuffleFrogRupees(Toggle):
+class ShuffleFrogRupees(OoT3DToggle):
     """
     Enabling this adds 5 Purple Rupees to the item\n
     pool and shuffles the rewards from playing Zelda's
@@ -1219,7 +1259,7 @@ class ShuffleFrogRupees(Toggle):
     display_name = "Shuffle Frog Rupees"
     default = False
 
-class ShuffleEnemySouls(Choice):
+class ShuffleEnemySouls(OoT3DChoice):
     """
     Enemies will be invincible until you find their
     \"soul\".
@@ -1237,7 +1277,7 @@ class ShuffleEnemySouls(Choice):
     option_bosses_only = 2
     default = option_off
 
-class ShuffleOcarinaButtons(Toggle):
+class ShuffleOcarinaButtons(OoT3DToggle):
     """
     Enabling this locks all Ocarina inputs, and adds
     5 new items to find that each unlock one of the 5
@@ -1248,7 +1288,7 @@ class ShuffleOcarinaButtons(Toggle):
     display_name = "Shuffle Ocarina Buttons"
     default = False
 
-class ShuffleStandingRupees(Toggle):
+class ShuffleStandingRupees(OoT3DToggle):
     """
     Shuffles all freestanding visible rupees
     that are placed in the world without player
@@ -1261,7 +1301,7 @@ class ShuffleStandingRupees(Toggle):
     display_name = "Shuffle Standing Rupees"
     default = False
 
-class ShuffleRecoveryHearts(Toggle):
+class ShuffleRecoveryHearts(OoT3DToggle):
     """
     Shuffles all freestanding visible recovery hearts
     that are placed in the world without player
@@ -1270,7 +1310,7 @@ class ShuffleRecoveryHearts(Toggle):
     display_name = "Shuffle Recovery Hearts"
     default = False
 
-class ShuffleBigPoes(Toggle):
+class ShuffleBigPoes(OoT3DToggle):
     """
     The 10 Big Poes in Hyrule Field will drop random
     items.
@@ -1286,7 +1326,7 @@ class ShuffleBigPoes(Toggle):
 # Shuffle Dungeon Items #
 #########################
 
-class ShuffleMapsAndCompasses(Choice):
+class ShuffleMapsAndCompasses(OoT3DChoice):
     """
     Start With:
     Maps and Compasses are given to you from the
@@ -1322,7 +1362,7 @@ class ShuffleMapsAndCompasses(Choice):
     option_anywhere = 5
     default = option_own_dungeon
 
-class ShuffleSmallKeys(Choice):
+class ShuffleSmallKeys(OoT3DChoice):
     """
     Start With:
     Small Keys are given to you from the start so you
@@ -1366,7 +1406,7 @@ class ShuffleSmallKeys(Choice):
     option_anywhere = 5
     default = option_own_dungeon
 
-class ShuffleGerudoFortressKeys(Choice):
+class ShuffleGerudoFortressKeys(OoT3DChoice):
     """
     Vanilla:
     Gerudo Fortress Keys will appear in their vanilla
@@ -1393,7 +1433,7 @@ class ShuffleGerudoFortressKeys(Choice):
     option_anywhere = 3
     default = option_vanilla
 
-class ShuffleBossKeys(Choice):
+class ShuffleBossKeys(OoT3DChoice):
     """
     Start With:
     Boss Keys are given to you from the start so you
@@ -1433,7 +1473,7 @@ class ShuffleBossKeys(Choice):
     option_anywhere = 5
     default = option_own_dungeon
 
-class ShuffleGanonsBossKey(Choice):
+class ShuffleGanonsBossKey(OoT3DChoice):
     """
     Start With:
     Ganon's Castle Boss Key is given to you from the
@@ -1480,38 +1520,41 @@ class ShuffleGanonsBossKey(Choice):
     option_LACS_hearts = 12
     default = option_own_dungeon
 
-class LACSMedallionCount(Range):
+class LACSMedallionCount(OoT3DRange):
     """
     Set the number of Medallions required to trigger
     the Light Arrow Cutscene.
     """
     display_name = "LACS Medallion Count"
+    xml_name = "Medallion Count"
     range_start = 0
     range_end = 6
     default = 6
 
-class LACSStoneCount(Range):
+class LACSStoneCount(OoT3DRange):
     """
     Set the number of Spiritual Stones required to
     trigger the Light Arrow Cutscene.
     """
     display_name = "LACS Stone Count"
+    xml_name = "Stone Count"
     range_start = 0
     range_end = 3
     default = 3
 
-class LACSRewardCount(Range):
+class LACSRewardCount(OoT3DRange):
     """
     Set the number of Dungeon Rewards (Spiritual
     Stones and Medallions) required to trigger the
     Light Arrow Cutscene.
     """
     display_name = "LACS Reward Count"
+    xml_name = "Reward Count"
     range_start = 0
     range_end = 9
     default = 9
 
-class LACSDungeonCount(Range):
+class LACSDungeonCount(OoT3DRange):
     """
     Set the number of completed dungeons required to
     trigger the Light Arrow Cutscene.
@@ -1520,26 +1563,29 @@ class LACSDungeonCount(Range):
     into the blue warp at the end of them
     """
     display_name = "LACS Dungeon Count"
+    xml_name = "Dungeon Count"
     range_start = 0
     range_end = 8
     default = 8
 
-class LACSTokenCount(Range):
+class LACSTokenCount(OoT3DRange):
     """
     Set the number of Gold Skulltula Tokens required
     to trigger the Light Arrow Cutscene.
     """
     display_name = "LACS Token Count"
+    xml_name = "Token Count"
     range_start = 0
     range_end = 100
     default = 100
 
-class LACSHeartCount(Range):
+class LACSHeartCount(OoT3DRange):
     """
     Set the number of Hearts required to trigger the
     Light Arrow Cutscene.
     """
     display_name = "LACS Heart Count"
+    xml_name = "Heart Count"
     range_start = 0
     range_end = 20
     default = 20
@@ -1572,7 +1618,7 @@ class KeyRings(OptionSet):
 # Timesaver Settings #
 ######################
 
-class SkipChildStealth(Toggle):
+class SkipChildStealth(OoT3DToggle):
     """
     The crawlspace into Hyrule Castle goes straight to
     Zelda, skipping the guards.
@@ -1580,7 +1626,7 @@ class SkipChildStealth(Toggle):
     display_name = "Skip Child Stealth"
     default = True
 
-class SkipTowerEscape(Toggle):
+class SkipTowerEscape(OoT3DToggle):
     """
     The tower escape sequence between Ganondorf and
     Ganon will be skipped.
@@ -1588,7 +1634,7 @@ class SkipTowerEscape(Toggle):
     display_name = "Skip Tower Escape"
     default = True
 
-class SkipEponaRace(Toggle):
+class SkipEponaRace(OoT3DToggle):
     """
     Epona can be summoned with Epona's Song without
     needing to race Ingo.
@@ -1596,16 +1642,17 @@ class SkipEponaRace(Toggle):
     display_name = "Skip Epona Race"
     default = False
 
-class SkipMinigamesRepetitions(Toggle):
+class SkipMinigamesRepetitions(OoT3DToggle):
     """
     Completing the second objective in the Dampe Race
     and Gerudo Archery on the first attempt will give
     both rewards at once for that minigame.
     """
     display_name = "Minigames Repetitions"
+    xml_name = "Minigames repetitions"
     default = False
 
-class FreeScarecrow(Toggle):
+class FreeScarecrow(OoT3DToggle):
     """
     Pulling out the Ocarina near a spot at which
     Pierre can spawn will do so, without needing
@@ -1614,7 +1661,7 @@ class FreeScarecrow(Toggle):
     display_name = "Free Scarecrow"
     default = False
 
-class SkipFourPoesCutscene(Toggle):
+class SkipFourPoesCutscene(OoT3DToggle):
     """
     The cutscene with the 4 poes in Forest Temple will
     be skipped. If the cutscene is not skipped, it can
@@ -1623,7 +1670,7 @@ class SkipFourPoesCutscene(Toggle):
     display_name = "Four Poes Cutscene"
     default = True
 
-class LakeHyliaOwl(Toggle):
+class LakeHyliaOwl(OoT3DToggle):
     """
     The owl flight cutscene in Lake Hylia will be
     skipped. This cutscene lets you see what item
@@ -1632,7 +1679,7 @@ class LakeHyliaOwl(Toggle):
     display_name = "Lake Hylia Owl"
     default = True
 
-class BigPoeTargetCount(Range):
+class BigPoeTargetCount(OoT3DRange):
     """
     The Poe Collector will give a reward for turning
     in the chosen number of Big Poes.
@@ -1642,22 +1689,24 @@ class BigPoeTargetCount(Range):
     range_end = 10
     default = 1
 
-class CuccosToReturn(Range):
+class CuccosToReturn(OoT3DRange):
     """
     The cucco lady will give a reward for returning
     this many of her cuccos to the pen.
     """
     display_name = "Cuccos to Return"
+    xml_name = "Cuccos to return"
     range_start = 0
     range_end = 7
     default = 0
 
-class KingZoraSpeed(NamedRange):
+class KingZoraSpeed(OoT3DNamedRange):
     """
     Set the exact number of shuffles King Zora will
     take to move out of the way.
     """
     display_name = "King Zora Speed"
+    xml_name = "Exact Shuffle Count"
     range_start = 1
     range_end = 128
     special_range_names = {
@@ -1666,7 +1715,7 @@ class KingZoraSpeed(NamedRange):
     }
     default = 1
 
-class CompleteMaskQuest(Toggle):
+class CompleteMaskQuest(OoT3DToggle):
     """
     Once the happy mask shop is opened, all masks
     will be available to be borrowed.
@@ -1678,7 +1727,7 @@ class CompleteMaskQuest(Toggle):
 # Logic Options #
 #################
 
-class Logic(Choice):
+class Logic(OoT3DChoice):
     """
     Glitchless:
     No glitches are required, but may require some
@@ -1709,7 +1758,7 @@ class Logic(Choice):
     option_no_logic = 2
     default = option_glitchless
 
-class NightSkultullasExpectSun(Toggle):
+class NightSkultullasExpectSun(OoT3DToggle):
     """
     GS Tokens that can only be obtained during the
     night expect you to have Sun's Song to collect
@@ -1730,7 +1779,7 @@ class LogicalTricks(OptionSet):
         "Go Through Visible One-Way Collisions",
         "Fewer Tunic Requirements",
         "LW Adult Tree GS w/o Magic Beans",
-        "LH Lab Dive w/o Gold Skale",
+        "LH Lab Dive w/o Gold Scale",
         "LH Lab Wall GS w/ Jump Slash",
         "GY Crate PoH w/ Boomerang",
         "GY Second Dampe Race as Child",
@@ -1820,7 +1869,7 @@ class LogicalTricks(OptionSet):
 # Glitches #
 ############
 
-class Glitch(NamedRange):
+class Glitch(OoT3DNamedRange):
     range_start = 0
     range_end = 5
     special_range_names = {
@@ -2322,7 +2371,7 @@ class MiscGlitches(OptionSet):
 # Misc Settings #
 #################
 
-class Racing(Toggle):
+class Racing(OoT3DToggle):
     """
     Overrides personalization options that could
     affect how fast a seed is beaten.
@@ -2330,7 +2379,7 @@ class Racing(Toggle):
     display_name = "Racing"
     default = False
 
-class GossipStoneHints(Choice):
+class GossipStoneHints(OoT3DChoice):
     """
     Gossip Stones can be made to give hints about
     where items can be found.
@@ -2349,7 +2398,7 @@ class GossipStoneHints(Choice):
     option_shard_of_agony = 3
     default = option_need_nothing
 
-class HintDistribution(Choice):
+class HintDistribution(OoT3DChoice):
     """
     Useless:
     Only junk hints.
@@ -2413,7 +2462,7 @@ class MiscHints(OptionSet):
     }
     default = valid_keys
 
-class HintClarity(Choice):
+class HintClarity(OoT3DChoice):
     """
     Sets the difficulty of hints.
 
@@ -2438,7 +2487,7 @@ class HintClarity(Choice):
     option_clear = 2
     default = option_obscure
 
-class CompassesShowRewards(Toggle):
+class CompassesShowRewards(OoT3DToggle):
     """
     Obtaining a dungeon compass will hint at the
     location of a Spiritual Stone or Medallion.
@@ -2454,7 +2503,7 @@ class CompassesShowRewards(Toggle):
     display_name = "Compasses Show Rewards"
     default = False
 
-class CompassesShowWotH(Toggle):
+class CompassesShowWotH(OoT3DToggle):
     """
     The in-game menu will reveal whether each
     dungeon is on the Way of the Hero, a barren
@@ -2464,7 +2513,7 @@ class CompassesShowWotH(Toggle):
     display_name = "Compasses Show WotH"
     default = True
 
-class MapsShowDungeonModes(Toggle):
+class MapsShowDungeonModes(OoT3DToggle):
     """
     If any Master Quest dungeons will be randomly
     shuffled, the in-game menu will reveal whether
@@ -2476,7 +2525,7 @@ class MapsShowDungeonModes(Toggle):
     display_name = "Maps Show Dungeon Modes"
     default = True
 
-class StartingTime(Choice):
+class StartingTime(OoT3DChoice):
     """
     Change up Link's sleep routine.
     """
@@ -2485,7 +2534,7 @@ class StartingTime(Choice):
     option_night = 1
     default = option_day
 
-class ChestAnimations(Choice):
+class ChestAnimations(OoT3DChoice):
     """
     Choose if you want the slow animation to play
     if a chest contains a major item.
@@ -2494,7 +2543,7 @@ class ChestAnimations(Choice):
     option_always_fast = 0
     option_match_contents = 1
 
-class ChestAppearanceMod(Choice):
+class ChestAppearanceMod(OoT3DChoice):
     """
     Vanilla:
     Chests will appear as they do in the base game.
@@ -2538,7 +2587,7 @@ class ChestAppearanceMod(Choice):
             return "Size + Texture"
         return super().get_option_name(value) # type: ignore
 
-class ChestAgony(Toggle):
+class ChestAgony(OoT3DToggle):
     """
     The Chest Appearance Mod will only apply
     after obtaining the Shard of Agony.
@@ -2546,7 +2595,7 @@ class ChestAgony(Toggle):
     display_name = "Need Shard of Agony"
     default = False
 
-class KeepExtraShields(Choice):
+class KeepExtraShields(OoT3DChoice):
     """
     Allow keeping more than 1 Deku and Hylian shield
     in the inventory, so if you lose one you can then
@@ -2573,7 +2622,7 @@ class KeepExtraShields(Choice):
 # Item Pool Settings #
 ######################
 
-class ItemPool(Choice):
+class ItemPool(OoT3DChoice):
     """
     Balanced:
     Original item pool.
@@ -2595,7 +2644,7 @@ class ItemPool(Choice):
     option_plentiful = 3
     default = option_balanced
 
-class IceTraps(Choice):
+class IceTraps(OoT3DChoice):
     """
     Off:
     All Ice Traps are removed.
@@ -2622,7 +2671,7 @@ class IceTraps(Choice):
     option_onslaught = 4
     default = option_normal
 
-class RemoveDoubleDefense(Toggle):
+class RemoveDoubleDefense(OoT3DToggle):
     """
     If set the double defense item will be removed
     from the item pool for balanced and plentiful.
@@ -2630,7 +2679,7 @@ class RemoveDoubleDefense(Toggle):
     display_name = "Remove Double Defense"
     default = False
 
-class ProgGoronSword(Toggle):
+class ProgGoronSword(OoT3DToggle):
     """
     Giant's Knife will always be found         
     before Biggoron's Sword. Medigoron only starts
@@ -2644,7 +2693,7 @@ class ProgGoronSword(Toggle):
 # Item Usability Settings #
 ###########################
 
-class FaroresWindAnywhere(Toggle):
+class FaroresWindAnywhere(OoT3DToggle):
     """
     Farore's Wind can be used outside of dungeons.
     """
@@ -2680,15 +2729,16 @@ class LiftAgeRestrictions(OptionSet):
     }
     default = {}
 
-class LiftAgeRestrictionsInLogic(Toggle):
+class LiftAgeRestrictionsInLogic(OoT3DToggle):
     """
     Using items as the wrong age may be required to
     beat the seed.
     """
     display_name = "Consider Lifted Age Restrictions in Logic"
+    xml_name = "Consider in Logic"
     default = False
 
-class RestoreISG(Toggle):
+class RestoreISG(OoT3DToggle):
     """
     The Infinite Sword Glitch will work like in OoT.
     
@@ -2699,7 +2749,7 @@ class RestoreISG(Toggle):
     display_name = "Restore ISG"
     default = True
 
-class GKDurability(Choice):
+class GKDurability(OoT3DChoice):
     """
     Vanilla:
     The durability will always be set to 8.
@@ -2719,7 +2769,7 @@ class GKDurability(Choice):
     option_random_safe = 2
     default = option_vanilla
 
-class RupeesAsAmmo(Toggle):
+class RupeesAsAmmo(OoT3DToggle):
     """
     If you run out of ammo or magic, you'll use
     rupees instead.
@@ -2731,7 +2781,7 @@ class RupeesAsAmmo(Toggle):
 # Gameplay Settings #
 #####################
 
-class FastBunnyHood(Toggle):
+class FastBunnyHood(OoT3DToggle):
     """
     The Bunny Hood mask behaves like it does in
     Majora's Mask and makes you run 50% faster.
@@ -2739,7 +2789,7 @@ class FastBunnyHood(Toggle):
     display_name = "Fast Bunny Hood"
     default = False
 
-class KeepFWWarpPoint(Toggle):
+class KeepFWWarpPoint(OoT3DToggle):
     """
     The Farore's Wind warp point will stay active
     after having been warped to. The old point will
@@ -2748,7 +2798,7 @@ class KeepFWWarpPoint(Toggle):
     display_name = "Keep FW Warp Point"
     default = False
 
-class DamageMultiplier(Choice):
+class DamageMultiplier(OoT3DChoice):
     """
     Changes the amount of damage taken.
     
@@ -2782,7 +2832,7 @@ class DamageMultiplier(Choice):
             return "OHKO"
         return super().get_option_name(value) # type: ignore
 
-class BonkDamage(Choice):
+class BonkDamage(OoT3DChoice):
     """
     Choose how many Hearts of damage you'll take when
     hitting a wall or object during a roll.
@@ -2819,7 +2869,7 @@ class BonkDamage(Choice):
             return "OHKO"
         return super().get_option_name(value) # type: ignore
 
-class GloomMode(Choice):
+class GloomMode(OoT3DChoice):
     """
     Enabling this setting will make your hearts
     permanently disappear on various conditions.
@@ -2857,7 +2907,7 @@ class GloomMode(Choice):
     option_empty = 4
     default = option_off
 
-class RandomTrapDamage(Choice):
+class RandomTrapDamage(OoT3DChoice):
     """
     Off:
     All traps will be the base game ice trap
@@ -2876,7 +2926,7 @@ class RandomTrapDamage(Choice):
     option_advanced = 2
     default = option_basic
 
-class FireTrap(Toggle):
+class FireTrap(OoT3DToggle):
     """
     This trap will set you on fire, burning your
     Deku Shield if it's equipped.
@@ -2884,7 +2934,7 @@ class FireTrap(Toggle):
     display_name = "Fire Trap"
     default = True
 
-class AntiFairyTrap(Toggle):
+class AntiFairyTrap(OoT3DToggle):
     """
     This dangerous fairy will inflict up to 8 hearts
     of damage, but it usually doesn't kill you if you
@@ -2893,7 +2943,7 @@ class AntiFairyTrap(Toggle):
     display_name = "Anti Fairy Trap"
     default = True
 
-class RupoorTrap(Choice):
+class RupoorTrap(OoT3DChoice):
     """
     This rupee will make you poor instead of rich.
 
@@ -2917,21 +2967,21 @@ class RupoorTrap(Choice):
     option_bankruptcy = 3
     default = option_off
 
-class CurseTraps(Toggle):
+class CurseTraps(OoT3DToggle):
     """
     Some traps will apply status effects for 1 minute.
     """
     display_name = "Curse Traps"
     default = False
 
-class ScreenTraps(Toggle):
+class ScreenTraps(OoT3DToggle):
     """
     Extra curses are added that rotate the screen.
     """
     display_name = "Screen Traps"
     default = False
 
-class ExtraArrowEffects(Toggle):
+class ExtraArrowEffects(OoT3DToggle):
     """
     Ice Arrows will act like blue fire, melting red
     ice and breaking mud walls in Dodongo's Cavern.
@@ -2955,7 +3005,7 @@ class HyperActors(OptionSet):
     }
     default = {}
 
-class FreeCamera(Toggle):
+class FreeCamera(OoT3DToggle):
     """
     Use the C-stick to control the camera on new 3DS
     systems and Citra.
@@ -2966,7 +3016,7 @@ class FreeCamera(Toggle):
     display_name = "Free Camera"
     default = True
 
-class RandomGSLocations(Toggle):
+class RandomGSLocations(OoT3DToggle):
     """
     Moves Gold Skulltulas to different locations
     around the same area as the original.
@@ -2982,7 +3032,7 @@ class RandomGSLocations(Toggle):
     display_name = "Random GS Locations"
     default = False
 
-class GuaranteeNewLocations(Toggle):
+class GuaranteeNewLocations(OoT3DToggle):
     """
     Excludes the original location from the Gold
     Skulltula's available locations pool.
@@ -2991,9 +3041,10 @@ class GuaranteeNewLocations(Toggle):
     will be used regardless.
     """
     display_name = "Guarantee New GS Locations"
+    xml_name = "Guarantee New"
     default = False
 
-class RandomOcarinaMelodies(Toggle):
+class RandomOcarinaMelodies(OoT3DToggle):
     """
     Randomize the notes for each ocarina song.
     Regular songs will be 3 notes repeated twice.
@@ -3002,7 +3053,7 @@ class RandomOcarinaMelodies(Toggle):
     display_name = "Random Ocarina Melodies"
     default = False
 
-class FrogSongTimer(Range):
+class FrogSongTimer(OoT3DRange):
     """
     Multiplier for the time you have to play each
     note in the final frog song.
