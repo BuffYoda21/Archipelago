@@ -6,6 +6,7 @@ import json
 from BaseClasses import ItemClassification
 from CommonClient import ClientCommandProcessor, CommonContext, get_base_parser, gui_enabled, logger, server_loop
 from NetUtils import ClientStatus
+from .utils import to_xml
 from .citra import CitraInterface, CitraException
 from .triple import TripleInterface, TripleException
 from ..world import OoT3DWorld
@@ -216,31 +217,38 @@ class OoT3DClientContext(CommonContext):
             logger.info("No slot data to send")
             return
 
-        payload = json.dumps(self.slot_data, separators=(",", ":")).encode("utf-8")
-
-        if len(payload) > self.AP_PAYLOAD_SIZE:
-            raise ValueError(f"Slot data is too large: {len(payload)} bytes (maximum {self.AP_PAYLOAD_SIZE})")
+        payload = to_xml(self.slot_data["options"]).encode("utf-8")
 
         while (await self.interface.read(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_LOCK_OFFSET, 1)) != b"\x00":
             await asyncio.sleep(0)
 
         stage = await self.interface.read_u32(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_STAGE_OFFSET)
 
-        # Clear payload region to prevent stale data.
-        await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_PAYLOAD_OFFSET, bytes(self.AP_PAYLOAD_SIZE))
+        for offset in range(0, len(payload), self.AP_PAYLOAD_SIZE):
+            segment = payload[offset:offset + self.AP_PAYLOAD_SIZE]
 
-        # Write payload
-        await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_PAYLOAD_OFFSET, payload)
+            # Clear payload region to prevent stale data.
+            await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_PAYLOAD_OFFSET,
+                                       bytes(self.AP_PAYLOAD_SIZE))
 
-        # Write payload size
-        await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_PAYLOAD_SIZE_OFFSET, len(payload).to_bytes(4, "little"))
+            # Write payload
+            await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_PAYLOAD_OFFSET, segment)
 
-        # may need to refactor later to loop until all data is sent if payloads get too large
-        # right now this just assumes all data fits into a single payload
-        await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_STAGE_OFFSET, bytes([(stage + 1) & 0xFF]))
+            # Write payload size
+            await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_PAYLOAD_SIZE_OFFSET,
+                                       len(segment).to_bytes(4, "little"))
 
-        # set lock to 1 to tell the app it is safe to read
-        await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_LOCK_OFFSET, b"\x01")
+            if offset + len(segment) == len(payload):
+                # Increment stage to tell the app that the payload is complete
+                await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_STAGE_OFFSET,
+                                           bytes([(stage + 1) & 0xFF]))
+
+            # set lock to 1 to tell the app it is safe to read
+            await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_LOCK_OFFSET, b"\x01")
+
+            if offset + len(segment) != len(payload):
+                while (await self.interface.read(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_LOCK_OFFSET, 1)) != b"\x00":
+                    await asyncio.sleep(0)
     
     async def validate_save(self) -> None:
         self.save_ptr = 0
