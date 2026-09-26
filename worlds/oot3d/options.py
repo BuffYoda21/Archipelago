@@ -2382,6 +2382,26 @@ class MiscGlitches(OptionSet):
     }
     default = {}
 
+######################
+# Inventory Settings #
+######################
+
+class StartWithConsumables(OoT3DToggle):
+    """
+    Start the game with maxed out Deku Sticks and Deku
+    Nuts.
+    """
+    display_name = "Start with Consumables"
+    default = False
+
+class StartWithMaxRupees(OoT3DToggle):
+    """
+    Start the game with a full wallet.
+    Wallet upgrades will also fill the wallet.
+    """
+    display_name = "Start with Max Rupees"
+    default = False
+
 #################
 # Misc Settings #
 #################
@@ -3288,6 +3308,10 @@ class OoT3DOptions(PerGameCommonOptions):
     seam_walk:                       SeamWalk
     misc_glitches:                   MiscGlitches
 
+    # Inventory Settings
+    start_with_consumables:          StartWithConsumables
+    start_with_max_rupees:           StartWithMaxRupees
+
     # Misc Settings
     racing:                          Racing
     gossip_stone_hints:              GossipStoneHints
@@ -3559,6 +3583,13 @@ option_groups = [
             LedgeClip,
             SeamWalk,
             MiscGlitches,
+        ]
+    ),
+    OptionGroup(
+        "Inventory Settings",
+        [
+            StartWithConsumables,
+            StartWithMaxRupees,
         ]
     ),
     OptionGroup(
