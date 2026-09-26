@@ -1,18 +1,25 @@
 from dataclasses import dataclass
 
-from Options import T, Choice, NamedRange, OptionGroup, OptionSet, PerGameCommonOptions, Range, Toggle
+from Options import T, Choice, NamedRange, OptionGroup, OptionSet, PerGameCommonOptions, Range, Toggle, Visibility
+
+# xml_name: the string key used when converting to xml
+# xml_offset: the value in which to offset option values when converting to xml
 
 class OoT3DChoice(Choice):
     xml_name: str | None = None
+    xml_offset: int = 0
 
 class OoT3DRange(Range):
     xml_name: str | None = None
+    xml_offset: int = 0
 
 class OoT3DToggle(Toggle):
     xml_name: str | None = None
+    xml_offset: int = 0
 
 class OoT3DNamedRange(NamedRange):
     xml_name: str | None = None
+    xml_offset: int = 0
 
 #################
 # Open Settings #
@@ -1000,6 +1007,7 @@ class Shopsanity(OoT3DNamedRange):
     a random number of non-vanilla shop items.
     """
     display_name = "Shopsanity"
+    xml_offset = 1
     range_start = 0
     range_end = 4
     special_range_names = {
@@ -2943,6 +2951,14 @@ class AntiFairyTrap(OoT3DToggle):
     display_name = "Anti Fairy Trap"
     default = True
 
+# Done like this since having it display as one option just makes more sense for the AP
+# The toggle is not meant to be used by the user and will be automatically set based
+# on the user facing RupoorTrap option
+class RupoorTrapToggle(OoT3DToggle):
+    xml_name = "Rupoor Trap"
+    visibility = Visibility.none
+    default = False
+
 class RupoorTrap(OoT3DChoice):
     """
     This rupee will make you poor instead of rich.
@@ -2961,6 +2977,8 @@ class RupoorTrap(OoT3DChoice):
     sad.
     """
     display_name = "Rupoor Trap"
+    xml_name = "Severity"
+    xml_offset = -1
     option_off = 0
     option_ten = 1
     option_random_ratio = 2
@@ -3301,6 +3319,7 @@ class OoT3DOptions(PerGameCommonOptions):
     random_trap_damage:              RandomTrapDamage
     fire_trap:                       FireTrap
     anti_fairy_trap:                 AntiFairyTrap
+    rupoor_trap_toggle:              RupoorTrapToggle
     rupoor_trap:                     RupoorTrap
     curse_traps:                     CurseTraps
     screen_traps:                    ScreenTraps
@@ -3584,6 +3603,7 @@ option_groups = [
             RandomTrapDamage,
             FireTrap,
             AntiFairyTrap,
+            RupoorTrapToggle,
             RupoorTrap,
             CurseTraps,
             ScreenTraps,

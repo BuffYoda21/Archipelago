@@ -33,6 +33,10 @@ def to_xml(options: Mapping[str, Any]) -> str:
 		option_type = OPTION_TYPES.get(option_name)
 		if option_type is not None and issubclass(option_type, OPTION_CLASSES):
 			xml_name = option_type.xml_name or option_type.display_name
+			if option_type.xml_offset:
+				value += option_type.xml_offset
+				if value < 0:
+					value = 0
 			overrides.append((xml_name, _xml_value(value)))
 		elif option_type is not None and issubclass(option_type, OptionSet):
 			overrides.extend((option_key, "1") for option_key in value)

@@ -3,6 +3,7 @@ from typing import Any
 
 from Options import get_option_groups
 from worlds.AutoWorld import World
+from .client.utils import to_xml
 
 from . import items, locations, regions, rules, web_world
 from . import options as oot3d_options
@@ -23,6 +24,52 @@ class OoT3DWorld(World):
 
     origin_region_name = "Menu"
 
+    def generate_early(self) -> None:
+        self.validate_options()
+
+    def validate_options(self) -> None:
+        NOVICE = 1
+        INTERMEDIATE = 2
+        ADVANCED = 3
+        EXPERT = 4
+        HERO = 5
+
+        def clamp(glitch: oot3d_options.Glitch, max_value: int):
+            if glitch.value > max_value:
+                glitch.value = max_value
+
+        clamp(self.options.restricted_items, NOVICE)
+        clamp(self.options.super_stab, NOVICE)
+        clamp(self.options.infinite_sword_glitch, ADVANCED)
+        clamp(self.options.bomb_hover, ADVANCED)
+        clamp(self.options.ocarina_items_bomb, EXPERT)
+        clamp(self.options.hover_boost, ADVANCED)
+        clamp(self.options.extend_super_slide, EXPERT)
+        clamp(self.options.megaflip, HERO)
+        clamp(self.options.a_slide, EXPERT)
+        clamp(self.options.hammer_slide, INTERMEDIATE)
+        clamp(self.options.ledge_cancel, ADVANCED)
+        clamp(self.options.action_swap, ADVANCED)
+        if self.options.action_swap.value == INTERMEDIATE:
+            self.options.quick_put_away.value = NOVICE # This specific glitch doesn't have an intermediate value
+        clamp(self.options.quick_put_away, EXPERT)
+        clamp(self.options.hooket_clip, INTERMEDIATE)
+        clamp(self.options.hooket_jump_bonk, ADVANCED)
+        clamp(self.options.hooket_jump_boots, ADVANCED)
+        clamp(self.options.cutscene_dives, ADVANCED)
+        clamp(self.options.navi_dive_stick, ADVANCED)
+        clamp(self.options.triple_slash_clip, EXPERT)
+        clamp(self.options.ledge_clip, ADVANCED)
+        clamp(self.options.seam_walk, HERO)
+
+        if self.options.rupoor_trap.value != self.options.rupoor_trap.option_off:
+            self.options.rupoor_trap_toggle.value = True
+        else:
+            self.options.rupoor_trap_toggle.value = 0
+
+        if self.options.rupoor_trap_toggle.value == 0:
+            self.options.rupoor_trap.value = self.options.rupoor_trap.option_off
+        
     def create_regions(self) -> None:
         regions.create_and_connect_regions(self)
         locations.create_all_locations(self)
@@ -47,5 +94,6 @@ class OoT3DWorld(World):
             group_name: self.options.as_dict(*group_options.keys(), toggles_as_bools=True)
             for group_name, group_options in option_groups.items()
         }
+        slot_data["xml"] = to_xml(slot_data["options"]) # debug
 
         return slot_data
