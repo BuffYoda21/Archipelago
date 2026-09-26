@@ -4,22 +4,28 @@ from Options import T, Choice, NamedRange, OptionGroup, OptionSet, PerGameCommon
 
 # xml_name: the string key used when converting to xml
 # xml_offset: the value in which to offset option values when converting to xml
+# xml_duplicate_index: some xml options have duplicates. In the case where the first instance is one not handled by AP,
+#                      this allows skipping over that one so we do not write to it with the wrong value
 
 class OoT3DChoice(Choice):
     xml_name: str | None = None
     xml_offset: int = 0
+    xml_duplicate_index: int = 0
 
 class OoT3DRange(Range):
     xml_name: str | None = None
     xml_offset: int = 0
+    xml_duplicate_index: int = 0
 
 class OoT3DToggle(Toggle):
     xml_name: str | None = None
     xml_offset: int = 0
+    xml_duplicate_index: int = 0
 
 class OoT3DNamedRange(NamedRange):
     xml_name: str | None = None
     xml_offset: int = 0
+    xml_duplicate_index: int = 0
 
 #################
 # Open Settings #
@@ -727,6 +733,7 @@ its vanilla enemy.
 
 class RandomizedEnemy(OoT3DChoice):
     __doc__ = random_enemy_docstring
+    xml_duplicate_index = 1
     option_randomized = 0
     option_vanilla = 1
     option_removed = 2

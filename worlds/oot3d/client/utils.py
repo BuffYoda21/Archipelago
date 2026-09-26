@@ -37,19 +37,24 @@ def to_xml(options: Mapping[str, Any]) -> str:
 				value += option_type.xml_offset
 				if value < 0:
 					value = 0
-			overrides.append((xml_name, _xml_value(value)))
+			overrides.append((xml_name, _xml_value(value), option_type.xml_duplicate_index))
 		elif option_type is not None and issubclass(option_type, OptionSet):
-			overrides.extend((option_key, "1") for option_key in value)
+			overrides.extend((option_key, "1", 0) for option_key in value)
 
 	overrides_by_name = {}
-	for option_name, value in overrides:
-		overrides_by_name.setdefault(option_name, []).append(value)
+	for option_name, value, duplicate_index in overrides:
+		overrides_by_name.setdefault(option_name, []).append((value, duplicate_index))
 
 	def replace_setting(match: re.Match[str]) -> str:
 		setting_name = match.group(2)
 		setting_overrides = overrides_by_name.get(setting_name)
 		if setting_overrides:
-			return f"{match.group(1)}{setting_overrides.pop(0)}{match.group(4)}"
+			value, duplicate_index = setting_overrides[0]
+			if duplicate_index:
+				setting_overrides[0] = (value, duplicate_index - 1)
+				return match.group(0)
+			setting_overrides.pop(0)
+			return f"{match.group(1)}{value}{match.group(4)}"
 		return match.group(0)
 
 	return SETTING_PATTERN.sub(replace_setting, TEMPLATE_PATH.read_text(encoding="utf-8"))
