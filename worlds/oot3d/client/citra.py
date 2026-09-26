@@ -3,6 +3,10 @@ import socket
 import struct
 import asyncio
 
+"""
+Respectfully taken from the ALBW AP (https://github.com/randomsalience/albw-archipelago)
+"""
+
 class CitraException(Exception):
     pass
 

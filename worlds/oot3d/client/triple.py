@@ -5,6 +5,10 @@ import asyncio
 
 from CommonClient import logger
 
+"""
+Respectfully taken from the ALBW AP (https://github.com/randomsalience/albw-archipelago)
+"""
+
 class TripleException(Exception):
     pass
 

@@ -11,6 +11,10 @@ from .citra import CitraInterface, CitraException
 from .triple import TripleInterface, TripleException
 from ..world import OoT3DWorld
 
+"""
+Original client code comes from the ALBW AP (https://github.com/randomsalience/albw-archipelago)
+"""
+
 citra = CitraInterface()
 triple = TripleInterface()
 triple_addr = ""
@@ -169,16 +173,10 @@ class OoT3DClientContext(CommonContext):
             
         if (await self.interface.read(self.AP_HEADER_LOCATION, 4)) != b"ARCH":
             self.error("Running incompatible or incorrectly patched game.")
-        elif (await self.interface.read_u32(self.AP_HEADER_LOCATION + 0x4)) < self.DATA_VERSION:
+        elif (await self.interface.read_u32(self.AP_HEADER_LOCATION + 0x8)) < self.DATA_VERSION:
             self.error("Version mismatch: update your oot3drandomizer library and re-patch.")
-        elif (await self.interface.read_u32(self.AP_HEADER_LOCATION + 0x4)) > self.DATA_VERSION:
+        elif (await self.interface.read_u32(self.AP_HEADER_LOCATION + 0x8)) > self.DATA_VERSION:
             self.error("Version mismatch: update your apworld and restart the client.")
-        else:
-            name = await self.interface.read(self.AP_HEADER_LOCATION + 0x10, 0x40)
-            end = name.find(0)
-            if end != -1:
-                name = name[:end]
-            self.auth = name.decode("utf-8")
     
     async def connect_app(self) -> None:
         if self.app_connection_status == AppConnectionStatus.NOT_CONNECTED:
@@ -249,7 +247,8 @@ class OoT3DClientContext(CommonContext):
             if offset + len(segment) != len(payload):
                 while (await self.interface.read(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_LOCK_OFFSET, 1)) != b"\x00":
                     await asyncio.sleep(0)
-    
+
+    # ALBW Leftover
     async def validate_save(self) -> None:
         self.save_ptr = 0
         all_saves_ptr = await self.interface.read_u32(self.SAVES_LOCATION)
@@ -266,6 +265,7 @@ class OoT3DClientContext(CommonContext):
         elif await self.interface.read_u32(self.save_ptr + 0xde8) != await self.interface.read_u32(self.AP_HEADER_LOCATION + 0x8):
             self.error("The loaded save file was created for a different multiworld. Choose a different save file.")
 
+    # ALBW Leftover
     async def validate_seed(self) -> None:
         if not self.server_connected or not self.slot_data:
             self.invalid = True
@@ -287,7 +287,8 @@ class OoT3DClientContext(CommonContext):
         if cmd == "LocationInfo":
             self.to_hint = [loc.location for loc in args["locations"]
                 if loc.flags & (ItemClassification.progression | ItemClassification.useful)]
-        
+
+    # ALBW Leftover
     async def get_pointers(self) -> bool:
         self.event_flags_ptr = await self.interface.read_u32(self.EVENTS_LOCATION)
         self.course_flags_ptr = await self.interface.read_u32(self.COURSES_LOCATION)
@@ -296,6 +297,7 @@ class OoT3DClientContext(CommonContext):
             return False
         return True
 
+    # ALBW Leftover
     async def is_in_game(self) -> bool:
         framework = await self.interface.read_u32(self.AP_HEADER_LOCATION + 0x54)
         if framework == 0:
@@ -313,6 +315,7 @@ class OoT3DClientContext(CommonContext):
             loop_count += 1
         return False
 
+    # ALBW Leftover
     async def read_flags(self) -> None:
         cur_event_flags = await self.interface.read(self.event_flags_ptr + 0x48, 0x80)
         save_event_flags = await self.interface.read(self.save_ptr + 0x40, 0x80)
@@ -328,6 +331,7 @@ class OoT3DClientContext(CommonContext):
             save_course_flags = await self.interface.read(self.save_ptr + 0x560 + course * 0x40, 0x40)
             self.course_flags.append(bytes_or(cur_course_flags, save_course_flags))
 
+    # ALBW Leftover
     def check_flag(self, course: Optional[int], flag: int) -> bool:
         byte = flag >> 3
         mask = 1 << (flag & 7)
@@ -355,6 +359,7 @@ class OoT3DClientContext(CommonContext):
         self.app_connection_status = AppConnectionStatus.NOT_CONNECTED
         self.authenticating = False
 
+# Mostly ALBW Leftovers
 async def game_watcher(ctx: OoT3DClientContext) -> None:
     global citra
     global triple
