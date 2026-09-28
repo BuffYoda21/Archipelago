@@ -1,7 +1,7 @@
 from collections.abc import Mapping
 from typing import Any
 
-from Options import get_option_groups
+from Options import OptionError, get_option_groups
 from worlds.AutoWorld import World
 from .client.utils import to_xml
 
@@ -25,8 +25,30 @@ class OoT3DWorld(World):
     origin_region_name = "Menu"
 
     def generate_early(self) -> None:
+        if bool(self.options.set_dungeon_types.value):
+            mq_dungeon_options: list[oot3d_options.OoT3DChoice] = [
+                self.options.deku_tree_dungeon_type,
+                self.options.dodongos_cavern_dungeon_type,
+                self.options.jabu_jabus_belly_dungeon_type,
+                self.options.forest_temple_dungeon_type,
+                self.options.fire_temple_dungeon_type,
+                self.options.water_temple_dungeon_type,
+                self.options.spirit_temple_dungeon_type,
+                self.options.shadow_temple_dungeon_type,
+                self.options.bottom_of_the_well_dungeon_type,
+                self.options.ice_cavern_dungeon_type,
+                self.options.training_grounds_dungeon_type,
+                self.options.ganons_castle_dungeon_type,
+            ]
+            mq_count = 0
+            for option in mq_dungeon_options:
+                mq_count += option.value
+            self.options.mq_dungeon_count.value = mq_count
+            
         self.validate_options()
 
+    # Might rework later to automatically adjust options instead of throwing for the sake of the
+    # fuzzer since right now it will ignore about half of the itterations
     def validate_options(self) -> None:
         NOVICE = 1
         INTERMEDIATE = 2
@@ -69,6 +91,36 @@ class OoT3DWorld(World):
 
         if self.options.rupoor_trap_toggle.value == 0:
             self.options.rupoor_trap.value = self.options.rupoor_trap.option_off
+
+
+        maxHearts = 20
+        if self.options.item_pool.value == self.options.item_pool.option_minimal:
+            maxHearts = 3
+        elif self.options.item_pool.value == self.options.item_pool.option_scarce:
+            maxHearts = 12
+
+        heartErrorMessage = ("\nNot enough Hearts in pool!\n\n" +
+                             "Please choose a different Item Pool\n" + 
+                             "setting or lower the Hearts requirement.")
+        if self.options.bridge_open.value == self.options.bridge_open.option_hearts and self.options.bridge_heart_count.value > maxHearts:
+            raise OptionError(heartErrorMessage)
+        if self.options.shuffle_ganons_boss_key.value == self.options.shuffle_ganons_boss_key.option_LACS_hearts and self.options.shuffle_lacs_heart_count.value > maxHearts:
+            raise OptionError(heartErrorMessage)
+
+        if (self.options.gloom_mode.value != self.options.gloom_mode.option_off and
+           (self.options.bridge_open.value == self.options.bridge_open.option_hearts or
+            self.options.shuffle_ganons_boss_key.value == self.options.shuffle_ganons_boss_key.option_LACS_hearts)):
+            raise OptionError("\nGloom Mode is incompatible with Heart\n" + 
+                              "requirements for LACS or Rainbow Bridge.")
+
+        if (self.options.mq_dungeon_count.value != 0 and self.options.logic.value != self.options.logic.option_no_logic and 
+            (self.options.shuffle_enemy_souls.value == self.options.shuffle_enemy_souls.option_all_enemies or bool(self.options.enemy_randomizer.value))):
+            raise OptionError("\nThe following features currently do not\n" +
+                              "support logic for Master Quest dungeons.\n" +
+                              "To use them you must disable Logic OR\n" +
+                              "set MQ Dungeon Count to 0.\n\n" +
+                              "- Enemy Randomizer\n" +
+                              "- Shuffle Enemy Souls")
         
     def create_regions(self) -> None:
         regions.create_and_connect_regions(self)
