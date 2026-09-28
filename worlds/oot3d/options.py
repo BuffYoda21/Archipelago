@@ -27,6 +27,29 @@ class OoT3DNamedRange(NamedRange):
     xml_offset: int = 0
     xml_duplicate_index: int = 0
 
+################
+# Game Options #
+################
+
+class AutoCorrectYAML(Toggle):
+    """
+    If any incompatable options are selected, they
+    will automatically be adjusted during generation
+    so that only one generation attempt is needed.
+
+    Highly recommended to turn this on if you are
+    making excessive use of random options. If
+    you are hosting a large multiworld I also
+    HIGHLY recommend metaing this option on.
+
+    Leave off if you would like to be notified of
+    potential conflicts so that you can make
+    modifications yourself instead of finding out
+    something was changed without your knowledge.
+    """
+    display_name = "Automatically Resolve Option Conflicts"
+    default = False
+
 #################
 # Open Settings #
 #################
@@ -3110,6 +3133,9 @@ class FrogSongTimer(OoT3DRange):
 
 @dataclass
 class OoT3DOptions(PerGameCommonOptions):
+    # Game Options
+    autocorrect_yaml:                AutoCorrectYAML
+
     # Open Settings
     forest_open:                     OpenForest
     kak_gate_open:                   OpenKakarikoGate

@@ -94,17 +94,22 @@ class OoT3DWorld(World):
 
         if (self.options.forest_open.value == self.options.forest_open.option_closed and
             self.options.starting_age.value == self.options.starting_age.option_adult):
-            raise OptionError("Starting as adult is incompatible with closed forest")
+            if bool(self.options.autocorrect_yaml.value):
+                self.options.forest_open.value = self.options.forest_open.option_closed_deku
+            else:
+                raise OptionError("Starting as adult is incompatible with closed forest")
 
         if (self.options.starting_age.value == self.options.starting_age.option_adult and
             self.options.door_time_open.value == self.options.door_time_open.option_intended and
             self.options.shuffle_ocarinas.value == False and
             self.options.start_inventory.value.get("Progressive Ocarina", 0) == 0):
-            raise OptionError("\nStarting as adult is incompatible with\n" +
-                              "intended door of time and unshuffled\n" +
-                              "ocarinas unless you have a progressive\n" +
-                              "ocarina in your starting inventory")
-
+            if bool(self.options.autocorrect_yaml.value):
+                pass # When item table is implemented, push progressive ocarina as precollected
+            else:
+                raise OptionError("\nStarting as adult is incompatible with\n" +
+                                  "intended door of time and unshuffled\n" +
+                                  "ocarinas unless you have a progressive\n" +
+                                  "ocarina in your starting inventory")
 
         maxHearts = 20
         if self.options.item_pool.value == self.options.item_pool.option_minimal:
@@ -115,25 +120,40 @@ class OoT3DWorld(World):
         heartErrorMessage = ("\nNot enough Hearts in pool!\n\n" +
                              "Please choose a different Item Pool\n" + 
                              "setting or lower the Hearts requirement.")
+        
         if self.options.bridge_open.value == self.options.bridge_open.option_hearts and self.options.bridge_heart_count.value > maxHearts:
-            raise OptionError(heartErrorMessage)
+            if bool(self.options.autocorrect_yaml.value):
+                self.options.bridge_heart_count.value = maxHearts
+            else:
+                raise OptionError(heartErrorMessage)
+            
         if self.options.shuffle_ganons_boss_key.value == self.options.shuffle_ganons_boss_key.option_LACS_hearts and self.options.shuffle_lacs_heart_count.value > maxHearts:
-            raise OptionError(heartErrorMessage)
+            if bool(self.options.autocorrect_yaml.value):
+                self.options.shuffle_lacs_heart_count.value = maxHearts
+            else:
+                raise OptionError(heartErrorMessage)
 
         if (self.options.gloom_mode.value != self.options.gloom_mode.option_off and
            (self.options.bridge_open.value == self.options.bridge_open.option_hearts or
             self.options.shuffle_ganons_boss_key.value == self.options.shuffle_ganons_boss_key.option_LACS_hearts)):
-            raise OptionError("\nGloom Mode is incompatible with Heart\n" + 
-                              "requirements for LACS or Rainbow Bridge.")
+            if bool(self.options.autocorrect_yaml.value):
+                self.options.gloom_mode.value = self.options.gloom_mode.option_off
+            else:
+                raise OptionError("\nGloom Mode is incompatible with Heart\n" + 
+                                  "requirements for LACS or Rainbow Bridge.")
 
         if (self.options.mq_dungeon_count.value != 0 and self.options.logic.value != self.options.logic.option_no_logic and 
-            (self.options.shuffle_enemy_souls.value == self.options.shuffle_enemy_souls.option_all_enemies or bool(self.options.enemy_randomizer.value))):
-            raise OptionError("\nThe following features currently do not\n" +
-                              "support logic for Master Quest dungeons.\n" +
-                              "To use them you must disable Logic OR\n" +
-                              "set MQ Dungeon Count to 0.\n\n" +
-                              "- Enemy Randomizer\n" +
-                              "- Shuffle Enemy Souls")
+           (self.options.shuffle_enemy_souls.value == self.options.shuffle_enemy_souls.option_all_enemies or bool(self.options.enemy_randomizer.value))):
+            if bool(self.options.autocorrect_yaml.value):
+                self.options.mq_dungeon_count.value = 0
+                self.options.set_dungeon_types.value = False
+            else:
+                raise OptionError("\nThe following features currently do not\n" +
+                                  "support logic for Master Quest dungeons.\n" +
+                                  "To use them you must disable Logic OR\n" +
+                                  "set MQ Dungeon Count to 0.\n\n" +
+                                  "- Enemy Randomizer\n" +
+                                  "- Shuffle Enemy Souls")
         
     def create_regions(self) -> None:
         regions.create_and_connect_regions(self)
