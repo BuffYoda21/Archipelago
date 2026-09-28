@@ -25,26 +25,6 @@ class OoT3DWorld(World):
     origin_region_name = "Menu"
 
     def generate_early(self) -> None:
-        if bool(self.options.set_dungeon_types.value):
-            mq_dungeon_options: list[oot3d_options.OoT3DChoice] = [
-                self.options.deku_tree_dungeon_type,
-                self.options.dodongos_cavern_dungeon_type,
-                self.options.jabu_jabus_belly_dungeon_type,
-                self.options.forest_temple_dungeon_type,
-                self.options.fire_temple_dungeon_type,
-                self.options.water_temple_dungeon_type,
-                self.options.spirit_temple_dungeon_type,
-                self.options.shadow_temple_dungeon_type,
-                self.options.bottom_of_the_well_dungeon_type,
-                self.options.ice_cavern_dungeon_type,
-                self.options.training_grounds_dungeon_type,
-                self.options.ganons_castle_dungeon_type,
-            ]
-            mq_count = 0
-            for option in mq_dungeon_options:
-                mq_count += option.value
-            self.options.mq_dungeon_count.value = mq_count
-            
         self.validate_options()
 
     # Might rework later to automatically adjust options instead of throwing for the sake of the
@@ -91,6 +71,39 @@ class OoT3DWorld(World):
 
         if self.options.rupoor_trap_toggle.value == 0:
             self.options.rupoor_trap.value = self.options.rupoor_trap.option_off
+
+        if bool(self.options.set_dungeon_types.value):
+            mq_dungeon_options: list[oot3d_options.OoT3DChoice] = [
+                self.options.deku_tree_dungeon_type,
+                self.options.dodongos_cavern_dungeon_type,
+                self.options.jabu_jabus_belly_dungeon_type,
+                self.options.forest_temple_dungeon_type,
+                self.options.fire_temple_dungeon_type,
+                self.options.water_temple_dungeon_type,
+                self.options.spirit_temple_dungeon_type,
+                self.options.shadow_temple_dungeon_type,
+                self.options.bottom_of_the_well_dungeon_type,
+                self.options.ice_cavern_dungeon_type,
+                self.options.training_grounds_dungeon_type,
+                self.options.ganons_castle_dungeon_type,
+            ]
+            mq_count = 0
+            for option in mq_dungeon_options:
+                mq_count += option.value
+            self.options.mq_dungeon_count.value = mq_count
+
+        if (self.options.forest_open.value == self.options.forest_open.option_closed and
+            self.options.starting_age.value == self.options.starting_age.option_adult):
+            raise OptionError("Starting as adult is incompatible with closed forest")
+
+        if (self.options.starting_age.value == self.options.starting_age.option_adult and
+            self.options.door_time_open.value == self.options.door_time_open.option_intended and
+            self.options.shuffle_ocarinas.value == False and
+            self.options.start_inventory.value.get("Progressive Ocarina", 0) == 0):
+            raise OptionError("\nStarting as adult is incompatible with\n" +
+                              "intended door of time and unshuffled\n" +
+                              "ocarinas unless you have a progressive\n" +
+                              "ocarina in your starting inventory")
 
 
         maxHearts = 20
