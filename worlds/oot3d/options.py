@@ -3324,9 +3324,9 @@ class OoT3DOptions(PerGameCommonOptions):
     ledge_cancel:                    LedgeCancel
     action_swap:                     ActionSwap
     quick_put_away:                  QuickPutAway
-    hooket_clip:                     HookshotClip
-    hooket_jump_bonk:                HookshotJumpBonk
-    hooket_jump_boots:               HookshotJumpBoots
+    hookshot_clip:                     HookshotClip
+    hookshot_jump_bonk:                HookshotJumpBonk
+    hookshot_jump_boots:               HookshotJumpBoots
     cutscene_dives:                  CutsceneDives
     navi_dive_stick:                 NaviDiveStick
     triple_slash_clip:               TripleSlashClip

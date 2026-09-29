@@ -55,9 +55,9 @@ class OoT3DWorld(World):
         if self.options.action_swap.value == INTERMEDIATE:
             self.options.quick_put_away.value = NOVICE # This specific glitch doesn't have an intermediate value
         clamp(self.options.quick_put_away, EXPERT)
-        clamp(self.options.hooket_clip, INTERMEDIATE)
-        clamp(self.options.hooket_jump_bonk, ADVANCED)
-        clamp(self.options.hooket_jump_boots, ADVANCED)
+        clamp(self.options.hookshot_clip, INTERMEDIATE)
+        clamp(self.options.hookshot_jump_bonk, ADVANCED)
+        clamp(self.options.hookshot_jump_boots, ADVANCED)
         clamp(self.options.cutscene_dives, ADVANCED)
         clamp(self.options.navi_dive_stick, ADVANCED)
         clamp(self.options.triple_slash_clip, EXPERT)
@@ -166,10 +166,10 @@ class OoT3DWorld(World):
         items.create_all_items(self)
 
     def create_item(self, name: str) -> items.OoT3DItem:
-        return items.create_item_with_correct_classification(self, name)
+        return items.create_item(self, name)
     
-    def get_filler_item_name(self) -> str:
-        return items.get_random_filler_item_name(self)
+    #def get_filler_item_name(self) -> str:
+    #    return items.get_random_filler_item_name(self)
     
     def fill_slot_data(self) -> Mapping[str, Any]:
         slot_data: Mapping[str, Any] = {}

@@ -15,16 +15,10 @@ def set_all_rules(world: OoT3DWorld) -> None:
     set_completion_condition(world)
 
 def set_all_entrance_rules(world: OoT3DWorld) -> None:
-    spawn_to_placeholder_area = world.get_entrance("Spawn to Placeholder Area")
-    placeholder_area_to_placeholder_dungeon = world.get_entrance("Placeholder Area to Placeholder Dungeon")
-    placeholder_dungeon_to_finale = world.get_entrance("Placeholder Dungeon to Finale")
-
-    set_rule(spawn_to_placeholder_area, lambda state: state.has("Placeholder Item", world.player))
-    set_rule(placeholder_area_to_placeholder_dungeon, lambda state: state.has("Dungeon Open", world.player))
-    set_rule(placeholder_dungeon_to_finale, lambda state: state.has("Placeholder Item", world.player, 2))
+    pass
 
 def set_all_location_rules(world: OoT3DWorld) -> None:
     pass
 
 def set_completion_condition(world: OoT3DWorld) -> None:
-    world.multiworld.completion_condition[world.player] = lambda state: state.has("Victory", world.player)
+    world.multiworld.completion_condition[world.player] = lambda state: True
