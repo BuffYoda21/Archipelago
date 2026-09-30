@@ -24,5 +24,10 @@ def create_all_items(world: OoT3DWorld) -> None:
 
     world.multiworld.itempool += itempool
 
-def create_item(world: OoT3DWorld, name: str) -> OoT3DItem:
-    return OoT3DItem(name, item_table[Keys(ITEM_NAME_TO_ID[name])][1], ITEM_NAME_TO_ID[name], world.player)
+def create_item(world: OoT3DWorld, item: str | int) -> OoT3DItem:
+    if isinstance(item, str):
+        return create_item(world, ITEM_NAME_TO_ID[item])
+    return OoT3DItem(item_table[Keys(item)][0], item_table[Keys(item)][1], item, world.player)
+
+def get_item_name(item: int) -> str:
+    return item_table[Keys(item)][0]

@@ -102,9 +102,9 @@ class OoT3DWorld(World):
         if (self.options.starting_age.value == self.options.starting_age.option_adult and
             self.options.door_time_open.value == self.options.door_time_open.option_intended and
             self.options.shuffle_ocarinas.value == False and
-            self.options.start_inventory.value.get(item_table[Keys.PROGRESSIVE_OCARINA][0], 0) == 0):
+            self.options.start_inventory.value.get(items.get_item_name(Keys.PROGRESSIVE_OCARINA), 0) == 0):
             if bool(self.options.autocorrect_yaml.value):
-                self.options.start_inventory.value.update({item_table[Keys.PROGRESSIVE_OCARINA][0]: 1})
+                self.options.start_inventory.value.update({items.get_item_name(Keys.PROGRESSIVE_OCARINA): 1})
             else:
                 raise OptionError("\nStarting as adult is incompatible with\n" +
                                   "intended door of time and unshuffled\n" +

@@ -15,8 +15,8 @@ LOCATION_NAME_TO_ID = {name: key.value for key, (name, _) in location_table.item
 class OoT3DLocation(Location):
     game = "Ocarina of Time 3D"
 
-def get_location_names_with_ids(location_names: list[str]) -> dict[str, int | None]:
-    return {location_name: LOCATION_NAME_TO_ID[location_name] for location_name in location_names}
+def get_location_name(location: int) -> str:
+    return location_table[Keys(location)][0]
 
 def create_all_locations(world: OoT3DWorld) -> None:
     create_regular_locations(world)
