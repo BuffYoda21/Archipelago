@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 
 from BaseClasses import Entrance, Region
 
+from .keys import Keys
+
 if TYPE_CHECKING:
     from .world import OoT3DWorld
 
@@ -12,8 +14,11 @@ def create_and_connect_regions(world: OoT3DWorld) -> None:
     connect_regions(world)
 
 def create_all_regions(world: OoT3DWorld) -> None:
-    menu = Region("Menu", world.player, world.multiworld)
-    world.multiworld.regions += [menu]
+    root = Region(Keys.ROOT.name, world.player, world.multiworld)
+    kokiri_forest = Region(Keys.KOKIRI_FOREST.name, world.player, world.multiworld)
+    world.multiworld.regions += [root, kokiri_forest]
 
 def connect_regions(world: OoT3DWorld) -> None:
-    pass
+    root = world.get_region(Keys.ROOT.name)
+    kokiri_forest = world.get_region(Keys.KOKIRI_FOREST.name)
+    root.connect(kokiri_forest)

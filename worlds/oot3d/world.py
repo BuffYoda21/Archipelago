@@ -5,6 +5,7 @@ from Options import OptionError, get_option_groups
 from worlds.AutoWorld import World
 from .client.utils import to_xml
 
+from .keys import Keys
 from . import items, locations, regions, rules, web_world
 from . import options as oot3d_options
 
@@ -22,13 +23,11 @@ class OoT3DWorld(World):
     location_name_to_id = locations.LOCATION_NAME_TO_ID
     item_name_to_id = items.ITEM_NAME_TO_ID
 
-    origin_region_name = "Menu"
+    origin_region_name = Keys.ROOT.name
 
     def generate_early(self) -> None:
         self.validate_options()
 
-    # Might rework later to automatically adjust options instead of throwing for the sake of the
-    # fuzzer since right now it will ignore about half of the itterations
     def validate_options(self) -> None:
         NOVICE = 1
         INTERMEDIATE = 2

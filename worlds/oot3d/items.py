@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from BaseClasses import Item
 
 from .item_table import item_table
-from .keys import ItemKey
+from .keys import Keys
 
 if TYPE_CHECKING:
     from .world import OoT3DWorld
@@ -25,4 +25,4 @@ def create_all_items(world: OoT3DWorld) -> None:
     world.multiworld.itempool += itempool
 
 def create_item(world: OoT3DWorld, name: str) -> OoT3DItem:
-    return OoT3DItem(name, item_table[ItemKey(ITEM_NAME_TO_ID[name])][1], ITEM_NAME_TO_ID[name], world.player)
+    return OoT3DItem(name, item_table[Keys(ITEM_NAME_TO_ID[name])][1], ITEM_NAME_TO_ID[name], world.player)

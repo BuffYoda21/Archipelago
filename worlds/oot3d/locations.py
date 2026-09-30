@@ -4,17 +4,13 @@ from typing import TYPE_CHECKING
 
 from BaseClasses import Location
 
+from .keys import Keys
+from .location_table import location_table
+
 if TYPE_CHECKING:
     from .world import OoT3DWorld
 
-LOCATION_NAME_TO_ID = {
-    "Placeholder Location 1": 1,
-    "Placeholder Location 2": 2,
-    "Placeholder Location 3": 3,
-    "Placeholder Location 4": 4,
-    "Placeholder Location 5": 5,
-    "Placeholder Location 6": 6,
-}
+LOCATION_NAME_TO_ID = {name: key.value for key, (name, _) in location_table.items()}
 
 class OoT3DLocation(Location):
     game = "Ocarina of Time 3D"
@@ -27,8 +23,13 @@ def create_all_locations(world: OoT3DWorld) -> None:
     create_events(world)
 
 def create_regular_locations(world: OoT3DWorld) -> None:
-    menu = world.get_region("Menu")
-    menu.add_locations(LOCATION_NAME_TO_ID, OoT3DLocation)
+    root = world.get_region(Keys.ROOT.name)
+    kokiri_forest = world.get_region(Keys.KOKIRI_FOREST.name)
+    for location_key, (location_name, region_key) in location_table.items():
+        if region_key == Keys.ROOT:
+            pass #root.add_locations({location_name: location_key}, OoT3DLocation)
+        elif region_key == Keys.KOKIRI_FOREST:
+            kokiri_forest.add_locations({location_name: location_key}, OoT3DLocation)
 
 def create_events(world: OoT3DWorld) -> None:
     pass
