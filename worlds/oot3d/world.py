@@ -6,6 +6,7 @@ from worlds.AutoWorld import World
 from .client.utils import to_xml
 
 from .keys import Keys
+from .item_table import item_table
 from . import items, locations, regions, rules, web_world
 from . import options as oot3d_options
 
@@ -101,9 +102,9 @@ class OoT3DWorld(World):
         if (self.options.starting_age.value == self.options.starting_age.option_adult and
             self.options.door_time_open.value == self.options.door_time_open.option_intended and
             self.options.shuffle_ocarinas.value == False and
-            self.options.start_inventory.value.get("Progressive Ocarina", 0) == 0):
+            self.options.start_inventory.value.get(item_table[Keys.PROGRESSIVE_OCARINA][0], 0) == 0):
             if bool(self.options.autocorrect_yaml.value):
-                pass # When item table is implemented, push progressive ocarina as precollected
+                self.options.start_inventory.value.update({item_table[Keys.PROGRESSIVE_OCARINA][0]: 1})
             else:
                 raise OptionError("\nStarting as adult is incompatible with\n" +
                                   "intended door of time and unshuffled\n" +
