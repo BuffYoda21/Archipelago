@@ -6,7 +6,7 @@ import json
 from BaseClasses import ItemClassification
 from CommonClient import ClientCommandProcessor, CommonContext, get_base_parser, gui_enabled, logger, server_loop
 from NetUtils import ClientStatus
-from .utils import to_xml
+from .utils import options_to_xml
 from .citra import CitraInterface, CitraException
 from .triple import TripleInterface, TripleException
 from ..world import OoT3DWorld
@@ -106,6 +106,10 @@ class OoT3DClientContext(CommonContext):
     AP_STAGE_OFFSET: int  = 0x0B
     AP_PAYLOAD_SIZE_OFFSET: int  = 0x0C
     AP_PAYLOAD_OFFSET: int  = 0x10
+
+    # Randomizer App Protocol Stages
+    STAGE_SLOT_DATA: int = 0
+    STAGE_ITEM_LOCATION_MAPPING: int = 1
 
     # leftover stuff from albw
     # remove later
@@ -215,12 +219,16 @@ class OoT3DClientContext(CommonContext):
             logger.info("No slot data to send")
             return
 
-        payload = to_xml(self.slot_data["options"]).encode("utf-8")
+        await self.send_payload(options_to_xml(self.slot_data["options"]).encode("utf-8"), self.STAGE_SLOT_DATA)
 
+    async def send_payload(self, payload: bytes, stage: int) -> None:
         while (await self.interface.read(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_LOCK_OFFSET, 1)) != b"\x00":
             await asyncio.sleep(0)
 
-        stage = await self.interface.read_u32(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_STAGE_OFFSET)
+        current_stage = await self.interface.read_u32(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_STAGE_OFFSET)
+        if current_stage != stage:
+            logger.warning(f"Tried to send payload at stage {stage}, but current stage is {current_stage}")
+            return
 
         for offset in range(0, len(payload), self.AP_PAYLOAD_SIZE):
             segment = payload[offset:offset + self.AP_PAYLOAD_SIZE]
@@ -237,9 +245,9 @@ class OoT3DClientContext(CommonContext):
                                        len(segment).to_bytes(4, "little"))
 
             if offset + len(segment) == len(payload):
-                # Increment stage to tell the app that the payload is complete
+                # Increment current_stage to tell the app that the payload is complete
                 await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_STAGE_OFFSET,
-                                           bytes([(stage + 1) & 0xFF]))
+                                           bytes([(current_stage + 1) & 0xFF]))
 
             # set lock to 1 to tell the app it is safe to read
             await self.interface.write(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_LOCK_OFFSET, b"\x01")

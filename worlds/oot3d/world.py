@@ -3,7 +3,7 @@ from typing import Any
 
 from Options import OptionError, get_option_groups
 from worlds.AutoWorld import World
-from .client.utils import to_xml
+from .client.utils import options_to_xml
 
 from .keys import Keys
 from .item_table import item_table
@@ -179,6 +179,6 @@ class OoT3DWorld(World):
             group_name: self.options.as_dict(*group_options.keys(), toggles_as_bools=True)
             for group_name, group_options in option_groups.items()
         }
-        slot_data["xml"] = to_xml(slot_data["options"]) # debug
+        slot_data["option_xml"] = options_to_xml(slot_data["options"]) # debug
 
         return slot_data

@@ -19,7 +19,7 @@ def _xml_value(value: Any) -> str:
 		return str(int(value))
 	return str(value)
 
-def to_xml(options: Mapping[str, Any]) -> str:
+def options_to_xml(options: Mapping[str, Any]) -> str:
 	option_groups_to_convert = options.values()
 	if all(isinstance(option_group, Mapping) for option_group in option_groups_to_convert):
 		option_groups_to_convert = (
