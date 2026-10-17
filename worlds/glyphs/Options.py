@@ -106,10 +106,10 @@ class TrapTypes(OptionSet):
     Determines what kinds of traps will be added to the item pool
     Valid Keys:
     Momentum Trap: Launches the player at a random angle
-    John Trap: Spawns John for 1 minute
-    Slow Trap: Slows the player down for a short period of time
-    Screen Flip Trap: Flips the player's screen for a short period of time
-    Dash Trap: Slows the player's dash for a short period of time
+    John Trap: Spawns John for 30 seconds
+    Slow Trap: Slows the player down for 30 seconds
+    Screen Flip Trap: Flips the player's screen for 30 seconds
+    Dash Trap: Slows the player's dash for 30 seconds
     """
     display_name = "Trap Types"
     valid_keys = {
