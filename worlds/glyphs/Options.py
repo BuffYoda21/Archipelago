@@ -1,14 +1,6 @@
-from typing import List, Dict, Any
 from dataclasses import dataclass
 from worlds.AutoWorld import PerGameCommonOptions
 from Options import Choice, DeathLink, OptionGroup, OptionSet, Toggle, Range
-
-def create_option_groups() -> List[OptionGroup]:
-    option_group_list: List[OptionGroup] = []
-    for name, options in glyphs_option_groups.items():
-        option_group_list.append(OptionGroup(name=name, options=options))
-
-    return option_group_list
 
 
 
@@ -313,9 +305,50 @@ class GlyphsOptions(PerGameCommonOptions):
     WraithRuneCount:            WraithRuneCount
     WraithGlyphstoneCount:      WraithGlyphstoneCount
 
-glyphs_option_groups: Dict[str, List[Any]] = {
-    "Game Options": [Goal, StartingSword, StartingDash, DeathLink],
-    "Randomization Options": [RandomShopPrices, RandomButtonColorPercent, ExcludeBlack, ButtonSanity, ButtonShardPercent, ShardBundleMinSize, ShardBundleMaxSize, EnableTraps, TrapTypes, HatShuffle],
-    "Logical Options": [SwordlessCombat, DashPuzzlesSolved, LogicalWallJumps, FlowerPuzzleSkips],
-    "Open Settings": [WizardRequirements, WraithRequirements, WraithSilverCount, WraithGoldCount, WraithSmileCount, WraithRuneCount, WraithGlyphstoneCount],
-}
+option_groups = [
+    OptionGroup(
+        "Game Options",
+        [
+            Goal,
+            StartingSword,
+            StartingDash,
+            DeathLink,
+        ]
+    ),
+    OptionGroup(
+        "Randomization Options",
+        [
+            RandomShopPrices,
+            RandomButtonColorPercent,
+            ExcludeBlack,
+            ButtonSanity,
+            ButtonShardPercent,
+            ShardBundleMinSize,
+            ShardBundleMaxSize,
+            EnableTraps,
+            TrapTypes,
+            HatShuffle,
+        ]
+    ),
+    OptionGroup(
+        "Logical Options",
+        [
+            SwordlessCombat,
+            DashPuzzlesSolved,
+            LogicalWallJumps,
+            FlowerPuzzleSkips,
+        ]
+    ),
+    OptionGroup(
+        "Open Settings",
+        [
+            WizardRequirements,
+            WraithRequirements,
+            WraithSilverCount,
+            WraithGoldCount,
+            WraithSmileCount,
+            WraithRuneCount,
+            WraithGlyphstoneCount,
+        ]
+    ),
+]

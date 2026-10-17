@@ -7,7 +7,7 @@ from .Shop import get_shop_prices
 from .Types import ButtonData, ButtonColor, ItemData
 from .Locations import get_location_names, get_total_locations
 from .Items import create_item, create_itempool, item_table, hats
-from .Options import GlyphsOptions
+from .Options import GlyphsOptions, option_groups
 from .Regions import create_regions
 from .Rules import set_rules, connect_entrances
 from .Buttons import get_broken_button_ids, init_buttons, load_button_spoiler_data, randomize_buttons, get_raw_button_color_data, get_button_color_spoiler_data, get_broken_button_spoiler_data
@@ -24,6 +24,8 @@ class GlyphsWeb(WebWorld):
         "setup/en",
         ["BuffYoda21"]
     )]
+
+    option_groups = option_groups
 
 class GlyphsWorld(World):
     """
