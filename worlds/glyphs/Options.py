@@ -94,6 +94,7 @@ class ShardBundleMinSize(Range):
     display_name = "Shard Bundle Minimum Size"
     range_start = 1
     range_end = 50
+    default = 1
 
 class ShardBundleMaxSize(Range):
     """
@@ -103,6 +104,7 @@ class ShardBundleMaxSize(Range):
     display_name = "Shard Bundle Maximum Size"
     range_start = 1
     range_end = 50
+    default = 1
 
 class EnableTraps(Toggle):
     """
