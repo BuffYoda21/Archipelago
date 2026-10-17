@@ -94,6 +94,24 @@ class ButtonShardPercent(Range):
     range_end = 100
     default = 0
 
+class ShardBundleMinSize(Range):
+    """
+    Minimum number of shards to include in a shard bundle.
+    Bundles of size 1 will be treated as a single shard instead of a bundle.
+    """
+    display_name = "Shard Bundle Minimum Size"
+    range_start = 1
+    range_end = 50
+
+class ShardBundleMaxSize(Range):
+    """
+    Maximum number of shards to include in a shard bundle.
+    Bundles of size 1 will be treated as a single shard instead of a bundle.
+    """
+    display_name = "Shard Bundle Maximum Size"
+    range_start = 1
+    range_end = 50
+
 class EnableTraps(Toggle):
     """
     Adds traps to the itempool
@@ -273,6 +291,8 @@ class GlyphsOptions(PerGameCommonOptions):
     ExcludeBlack:               ExcludeBlack
     ButtonSanity:               ButtonSanity
     ButtonShardPercent:         ButtonShardPercent
+    ShardBundleMinSize:         ShardBundleMinSize
+    ShardBundleMaxSize:         ShardBundleMaxSize
     EnableTraps:                EnableTraps
     TrapTypes:                  TrapTypes
     HatShuffle:                 HatShuffle
@@ -295,7 +315,7 @@ class GlyphsOptions(PerGameCommonOptions):
 
 glyphs_option_groups: Dict[str, List[Any]] = {
     "Game Options": [Goal, StartingSword, StartingDash, DeathLink],
-    "Randomization Options": [RandomShopPrices, RandomButtonColorPercent, ExcludeBlack, ButtonSanity, ButtonShardPercent, EnableTraps, TrapTypes, HatShuffle],
+    "Randomization Options": [RandomShopPrices, RandomButtonColorPercent, ExcludeBlack, ButtonSanity, ButtonShardPercent, ShardBundleMinSize, ShardBundleMaxSize, EnableTraps, TrapTypes, HatShuffle],
     "Logical Options": [SwordlessCombat, DashPuzzlesSolved, LogicalWallJumps, FlowerPuzzleSkips],
     "Open Settings": [WizardRequirements, WraithRequirements, WraithSilverCount, WraithGoldCount, WraithSmileCount, WraithRuneCount, WraithGlyphstoneCount],
 }
