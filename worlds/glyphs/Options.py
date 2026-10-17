@@ -41,63 +41,16 @@ class StartingDash(Toggle):
     display_name = "Starting Dash"
     default = False
 
-## Cool idea but practically not great
-# class GenericParries(Toggle):
-#     """
-#     Allows normal damaging bullets to be parried.
-#     Parried bullets are 3x more powerful and move faster than normal.
-#     """
-#     display_name = "Generic Parries"
-#     default = False
-
-## Still coming soon. Just disabled since it isn't implemented yet
-# class Multiplayer(Toggle):
-#     """
-#     Enables multiplayer with other glyphs players in the multiworld that have this option enabled
-#     """
-#     display_name = "Multiplayer"
-#     default = False
-
 
 
 # Randomization Options
-## To be implemented when save button randomization is implemented
+## Possible future addition
 # class RandomizeWorldSpawn(Toggle):
 #     """
 #     Shuffles what save button you start on.
 #     If false, you will start at the standard spawn point.
 #     """
 #     display_name = "Randomize World Spawn"
-
-## Ending selection should already filter down locations its self
-# class LocationPool(Choice):
-#     """
-#     Determines what locations will be shuffled in the world.
-#     False Ending: Includes all locations relevent to the false ending
-#     Good Ending: Includes all locations relevent to the good ending
-#     Full Tomb: Like Good Ending but includes the between and master puzzles in the pool
-#     Outer Void: Includes Full Tomb and Outer Void locations
-#     """
-#     display_name = "Location Pool"
-#     option_false_ending = 1
-#     option_good_ending = 2
-#     option_full_tomb = 3
-#     option_outer_void = 4
-#     default = option_false_ending
-
-# class HatLocations(Toggle):
-#     """
-#     Adds hat puzzles to the location pool.
-#     If false, all hat puzzles will yield junk items.
-#     """
-#     display_name = "Include Hat Puzzles"
-
-# class Shopsanity(Toggle):
-#     """
-#     Shuffles smile shop items into the pool.
-#     Also removes the refund button (spend wisely).
-#     """
-#     display_name = "Shopsanity"
 
 class RandomShopPrices(Toggle):
     """
@@ -194,30 +147,12 @@ class SwordlessCombat(Toggle):
     display_name = "Swordless Combat"
     default = False
 
-## Doesnt actually seem very practical/fun
-# class BulletCombat(Toggle):
-#     """
-#     Considers defeating bosses with only parried projectiles in logic.
-#     Does nothing if Swordless Combat is not enabled.
-#     If Generic Parries is enabled, also includes relevant bosses.
-#     """
-#     display_name = "Parry Combat"
-#     default = False
-
 class DashPuzzlesSolved(Toggle):
     """
     Logic assumes you already have the answer to all the puzzles in the game written down somewhere.
     """
     display_name = "Assume Puzzles Solved"
     default = False
-
-## Actually might be alot harder to implement than I thought
-# class MultiplayerCheese(Toggle):
-#     """
-#     Considers skips made possible by multiplayer in logic.
-#     Does nothing if multiplayer is not enabled or if there are no other players to connect to.
-#     """
-#     display_name = "Multiplayer Cheeses in Logic"
 
 class LogicalWallJumps(Toggle):
     """
@@ -226,7 +161,7 @@ class LogicalWallJumps(Toggle):
     display_name = "Wall Jumps in Logic"
     default = False
 
-## Logically will never be needed
+## Very niche and if it ever ends up being logically relevant, it will probably just be out of logic anyway
 # class LogicalWallJumpChains(Toggle):
 #    """
 #    Considers skips that require multiple consecutive wall jumps (2-3) in logic.
@@ -329,14 +264,10 @@ class GlyphsOptions(PerGameCommonOptions):
     Goal:                       Goal
     StartingSword:              StartingSword
     StartingDash:               StartingDash
-  # GenericParries:             GenericParries
-  # Multiplayer:                Multiplayer
     DeathLink:                  DeathLink
 
     # Randomization Options
-  # LocationPool:               LocationPool
-  # HatLocations:               HatLocations
-  # Shopsanity:                 Shopsanity
+  # RandomizeWorldSpawn:        RandomizeWorldSpawn
     RandomShopPrices:           RandomShopPrices
     RandomButtonColorPercent:   RandomButtonColorPercent
     ExcludeBlack:               ExcludeBlack
@@ -348,7 +279,6 @@ class GlyphsOptions(PerGameCommonOptions):
 
     # Logical Options
     SwordlessCombat:            SwordlessCombat
-  # BulletCombat:               BulletCombat
     DashPuzzlesSolved:          DashPuzzlesSolved
     LogicalWallJumps:           LogicalWallJumps
   # LogicalWallJumpChains:      LogicalWallJumpChains
