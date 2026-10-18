@@ -4,13 +4,13 @@ from worlds.AutoWorld import World, CollectionState, WebWorld
 from typing import Any, Callable, Dict, Optional, TextIO
 
 from .Shop import get_shop_prices
-from .Types import ButtonData, ButtonColor, ItemData
+from .Types import ButtonData, ButtonColor, ItemData, ShardBundleData
 from .Locations import get_location_names, get_total_locations
 from .Items import create_item, create_itempool, item_table, hats
 from .Options import GlyphsOptions, option_groups
 from .Regions import create_regions
 from .Rules import set_rules, connect_entrances
-from .Buttons import get_broken_button_ids, init_buttons, load_button_spoiler_data, randomize_buttons, get_raw_button_color_data, get_button_color_spoiler_data, get_broken_button_spoiler_data
+from .Buttons import get_broken_button_ids, get_shard_bundle_spoiler_data, init_buttons, load_button_spoiler_data, load_shard_bundle_spoiler_data, randomize_buttons, get_raw_button_color_data, get_button_color_spoiler_data, get_broken_button_spoiler_data
 
 class GlyphsWeb(WebWorld):
     theme = "stone"
@@ -43,12 +43,13 @@ class GlyphsWorld(World):
     web = GlyphsWeb()
     shop_prices: list[int]
     buttons: dict[str, ButtonData]
+    shard_bundles: list[ShardBundleData]
     items: dict[str, ItemData]
     is_ut = False
     origin_region_name = "Menu"
 
     # Macros to be used in Macros.py
-    macro_init = False
+    macro_init: bool
     wall_jump_rule: Callable[[CollectionState], bool]
     can_fight_rule: Callable[[CollectionState], bool]
     wizard_available_rule: Callable[[CollectionState], bool]
@@ -56,6 +57,8 @@ class GlyphsWorld(World):
 
     def __init__(self, multiworld: "MultiWorld", player: int):
         super().__init__(multiworld, player)
+        self.macro_init = False
+        self.shard_bundles = []
 
     def generate_early(self):
         self.is_ut = getattr(self.multiworld, "generation_is_fake", False)
@@ -75,12 +78,19 @@ class GlyphsWorld(World):
                 if slot_data["broken_buttons"]:
                     broken_buttons = slot_data["broken_buttons"]
                 load_button_spoiler_data(self, button_colors, broken_buttons)
+                if slot_data["shard_bundles"]:
+                    load_shard_bundle_spoiler_data(self, slot_data["shard_bundles"])
 
             slot_options: dict[str, Any] = slot_data.get("options", {})
             for key, value in slot_options.items():
                 opt: Optional[Option] = getattr(self.options, key, None)
                 if opt is not None:
                     setattr(self.options, key, opt.from_any(value))
+
+        if self.options.ShardBundleMinSize.value > self.options.ShardBundleMaxSize.value:
+            tmp = self.options.ShardBundleMinSize.value
+            self.options.ShardBundleMinSize.value = self.options.ShardBundleMaxSize.value
+            self.options.ShardBundleMaxSize.value = tmp
 
         # This can be increased if the world gets less restrictive
         # Goal is to keep failure rate <=0.1% in the fuzzer
@@ -159,6 +169,7 @@ class GlyphsWorld(World):
             "shop_prices": prices,
             "button_colors": get_raw_button_color_data(self),
             "broken_buttons": get_broken_button_ids(self),
+            "shard_bundles": get_shard_bundle_spoiler_data(self),
             "Seed": self.multiworld.seed_name,
             "Slot": self.multiworld.player_name[self.player],
             "TotalLocations": get_total_locations(self)
@@ -177,6 +188,8 @@ class GlyphsWorld(World):
             spoiler_handle.write(f"\nGLYPHS: Button Colors ({self.player_name}): {get_button_color_spoiler_data(self)}\n")
         if self.options.ButtonShardPercent.value != 0:
             spoiler_handle.write(f"\nGLYPHS: Broken Buttons ({self.player_name}): {get_broken_button_spoiler_data(self)}\n")
+        if self.options.ShardBundleMaxSize.value > 1:
+            spoiler_handle.write(f"\nGLYPHS: Shard Bundles ({self.player_name}): {get_shard_bundle_spoiler_data(self)}\n")
 
     def collect(self, state: "CollectionState", item: "Item") -> bool:
         return super().collect(state, item)

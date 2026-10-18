@@ -3,8 +3,8 @@ from collections.abc import Callable
 from BaseClasses import CollectionState
 from typing import TYPE_CHECKING
 
-from .Buttons import get_button_color
-from .Types import ButtonColor
+from .Buttons import get_button_color, get_shard_bundle_from_shard
+from .Types import ButtonColor, ButtonData
 
 if TYPE_CHECKING:
     from . import GlyphsWorld
@@ -77,7 +77,7 @@ def can_press_buttons(state: CollectionState, world: "GlyphsWorld", button_list:
     for key in button_list:
         button = world.buttons[key]
 
-        if button.isBroken and not items[button.shardName]:
+        if is_button_broken(state, world, button):
             faults += 1
         elif button.color == ButtonColor.PINK:
             faults += not has_parry
@@ -92,6 +92,18 @@ def can_press_buttons(state: CollectionState, world: "GlyphsWorld", button_list:
             return False
 
     return True
+
+def is_button_broken(state: CollectionState, world: "GlyphsWorld", button: ButtonData) -> bool:
+    if not button.isBroken:
+        return False
+    
+    player = world.player
+    items = state.prog_items[player]
+
+    bundle = get_shard_bundle_from_shard(world, button.id)
+    if bundle is None:
+        return items[button.shardName] == 0
+    return items[bundle] == 0
 
 def between_buttons_missing(state: CollectionState, world: "GlyphsWorld") -> int:
     """

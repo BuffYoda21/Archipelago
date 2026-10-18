@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from .Util import to_generic_readable_region_name
 from .Options import GlyphsOptions
-from .Types import ButtonData, ButtonColor
+from .Types import ButtonData, ButtonColor, ShardBundleData
 from copy import deepcopy
 
 options: GlyphsOptions
@@ -68,6 +68,15 @@ def get_broken_buttons(world: "GlyphsWorld") -> list[str]:
 def get_button_color(world: "GlyphsWorld", button: str) -> ButtonColor:
     return world.buttons[button].color
 
+def get_shard_bundle_from_shard(world: "GlyphsWorld", shard: int) -> str | None:
+    i = 1
+    for shard_bundle in world.shard_bundles:
+        for shard_id in shard_bundle.shards:
+            if shard_id == shard:
+                return "Shard Bundle " + str(i)
+        i += 1
+    return None
+
 def is_broken(world: "GlyphsWorld", button: str) -> bool:
     return world.buttons[button].isBroken
 
@@ -99,6 +108,14 @@ def get_broken_button_spoiler_data(world: "GlyphsWorld") -> list[str]:
             broken_buttons.append(key)
     return broken_buttons
 
+def get_shard_bundle_spoiler_data(world: "GlyphsWorld") -> dict[str, list[int]]:
+    shard_bundles: dict[str, list[int]] = {}
+    i = 1
+    for shard_bundle in world.shard_bundles:
+        shard_bundles[f"Shard Bundle {i}"] = shard_bundle.shards
+        i += 1
+    return shard_bundles
+
 # for universal tracker compatibility
 def load_button_spoiler_data(world: "GlyphsWorld", color_data: dict[int, int], broken_data: list[int] = []) -> None:
     for button in world.buttons.values():
@@ -106,6 +123,10 @@ def load_button_spoiler_data(world: "GlyphsWorld", color_data: dict[int, int], b
             button.color = ButtonColor(color_data[button.id])
         if button.id in broken_data:
             button.isBroken = True
+
+def load_shard_bundle_spoiler_data(world: "GlyphsWorld", shard_bundles: dict[str, list[int]]) -> None:
+    for bundle in shard_bundles:
+        world.shard_bundles.append(ShardBundleData(shard_bundles[bundle]))
 
 glyphs_buttons = {
     "R1A Save":                 ButtonData(0,   "Region 1A",        ButtonColor.RED,    validColors=[ButtonColor.RED]),

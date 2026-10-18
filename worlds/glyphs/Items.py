@@ -1,6 +1,6 @@
 from BaseClasses import Item, ItemClassification
-from .Buttons import get_broken_buttons, get_shard_name
-from .Types import ItemData, GlyphsItem
+from .Buttons import get_broken_button_ids, get_broken_buttons, get_shard_name, glyphs_buttons
+from .Types import ItemData, GlyphsItem, ShardBundleData
 from .Locations import get_total_locations
 from typing import List, Dict, TYPE_CHECKING
 
@@ -48,9 +48,35 @@ def create_itempool(world: "GlyphsWorld") -> List[Item]:
         for item_name, item_data in hats.items():
             for _ in range(item_data.count or 1):
                 itempool.append(create_item(world, item_name))
-    
-    for button in get_broken_buttons(world):
-        itempool.append(create_item(world, get_shard_name(world, button)))
+
+    if world.options.ShardBundleMaxSize.value == 1:
+        for button in get_broken_buttons(world):
+            itempool.append(create_item(world, get_shard_name(world, button)))
+    else:
+        if not world.is_ut:
+            remaining = get_broken_buttons(world)
+            while len(remaining) > 0:
+                size = min(world.random.randint(world.options.ShardBundleMinSize.value, world.options.ShardBundleMaxSize.value), len(remaining))
+                shards: list[int] = []
+                for _ in range(size):
+                    selected = world.random.choice(remaining)
+                    shards.append(world.buttons[selected].id)
+                    remaining.remove(selected)
+                if len(shards) == 1:
+                    itempool.append(create_item(world, "Button Shard " + str(shards[0])))
+                else:
+                    world.shard_bundles.append(ShardBundleData(shards))
+        else:
+            remaining = get_broken_button_ids(world)
+            for bundle in world.shard_bundles:
+                for shard in bundle.shards:
+                    remaining.remove(shard)
+            for shard in remaining:
+                itempool.append(create_item(world, "Button Shard " + str(shard)))
+        i = 1
+        for _ in world.shard_bundles:
+            itempool.append(create_item(world, "Shard Bundle " + str(i)))
+            i += 1
         
     place_event_items(world)
     place_goals(world)
@@ -204,6 +230,14 @@ button_shards = {
     for shard in range(228)
 }
 
+shard_bundles = {
+    f"Shard Bundle {shard}": ItemData(
+        shard + 20000,
+        ItemClassification.progression_deprioritized_skip_balancing,
+    )
+    for shard in range((len(glyphs_buttons) + 1) // 2)
+}
+
 event_items = {
     "Defeat Runic Construct":        ItemData(1000,  ItemClassification.progression_skip_balancing),
     "Defeat Gilded Serpent":         ItemData(1001,  ItemClassification.progression_skip_balancing),
@@ -298,4 +332,5 @@ item_table = {
     **glyphs_regions,
     **junk_items,
     **button_shards,
+    **shard_bundles,
 }

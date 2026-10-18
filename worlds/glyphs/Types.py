@@ -42,6 +42,11 @@ class ButtonData:
     def __repr__(self) -> str:
         return f"ButtonData(id={self.id!r}, color={self.color!r}, isBroken={self.isBroken!r})"
 
+# Just a container for the list of shards in a shard bundle to make code more readable
+class ShardBundleData:
+    def __init__(self, shards: list[int]):
+        self.shards = shards
+
 class LocData(NamedTuple):
     ap_code: Optional[int]
     region: Optional[str]
