@@ -7,17 +7,25 @@ from BaseClasses import ItemClassification
 from CommonClient import ClientCommandProcessor, CommonContext, get_base_parser, gui_enabled, logger, server_loop
 from NetUtils import ClientStatus
 from .utils import options_to_xml
-from .citra import CitraInterface, CitraException
-from .triple import TripleInterface, TripleException
+from .interface import N3DSInterface, ConnectionError
 from ..world import OoT3DWorld
 
 """
 Original client code comes from the ALBW AP (https://github.com/randomsalience/albw-archipelago)
 """
 
-citra = CitraInterface()
-triple = TripleInterface()
+# going to focus on US for now but EU support should be trivial to implement
+US_TITLE_ID = 0x0004000000033500
+EU_TITLE_ID = 0x0004000000033600
+RANDOMIZER_APP_TITLE_ID = 0x0000000000000000
+
 triple_addr = ""
+is_3ds = False
+
+class AppType(Enum):
+    NONE = 0
+    GAME = 1
+    RANDOMIZER = 2
 
 class AppConnectionStatus(Enum):
     NOT_CONNECTED = 0
@@ -68,9 +76,11 @@ class OoT3DClientContext(CommonContext):
     items_handling: Optional[int] = 0b101 # receive remote items and starting inventory
     want_slot_data: bool = True
 
-    interface = None
+    interface = N3DSInterface()
     interface_connected: bool
+    app_type = AppType.NONE
     app_connection_status: AppConnectionStatus
+    initial_connect = False
     authenticating: bool
     server_connected: bool
     initial_delay: bool
@@ -152,22 +162,7 @@ class OoT3DClientContext(CommonContext):
             self.last_error = error
         self.invalid = True
     
-    async def citra_connect(self) -> None:
-        if self.show_citra_connect_message:
-            logger.info("Connecting to emulator...")
-        self.show_citra_connect_message = False
-        self.interface_connected = False
-        if not await self.interface.connect():
-            await asyncio.sleep(1)
-        else:
-            self.interface_connected = True
-            self.initial_delay = True
-            if self.server_connected:
-                logger.info("Emulator connected")
-            else:
-                logger.info("Emulator connected, but not yet connected to the multiworld")
-    
-    async def validate_rom(self) -> None:
+    async def read_header(self) -> None:
         # logger.info("read memory %s" % ((await self.interface.read(self.RANDOMIZER_APP_HEADER_LOCATION, 27))))
         # logger.info("app_connection_status %s" % (self.app_connection_status.name))
         if (await self.interface.read(self.RANDOMIZER_APP_HEADER_LOCATION, 8)) == b"OOT3RAND":
@@ -307,6 +302,7 @@ class OoT3DClientContext(CommonContext):
 
     # ALBW Leftover
     async def is_in_game(self) -> bool:
+        return False
         framework = await self.interface.read_u32(self.AP_HEADER_LOCATION + 0x54)
         if framework == 0:
             return False
@@ -369,71 +365,75 @@ class OoT3DClientContext(CommonContext):
 
 # Mostly ALBW Leftovers
 async def game_watcher(ctx: OoT3DClientContext) -> None:
-    global citra
-    global triple
     global triple_addr
-    ctx.interface = citra
+    global is_3ds
     while not ctx.exit_event.is_set():
         try:
             ctx.invalid = False
+            if triple_addr == "" and is_3ds:
+                ctx.interface_connected = False
+                ctx.interface.disconnect()
             if not ctx.interface_connected:
+                title_id = RANDOMIZER_APP_TITLE_ID
                 if triple_addr != "":
-                    if await triple.connect(triple_addr):
+                    if await ctx.interface.connect(triple_addr, title_id):
                         if ctx.show_triple_connected_message:
                             logger.info("3ds connected!")
-                        ctx.initial_delay = True
-                        ctx.interface = triple
+                        ctx.initial_connect = True
+                        is_3ds = True
                         ctx.interface_connected = True
                         ctx.show_citra_connect_message = False
                         ctx.show_triple_connected_message = False
                     else:
                         logger.info("Couldn't connect to 3ds.")
                         ctx.interface_connected = False
-                        triple.disconnect()
+                        ctx.interface.disconnect()
                         triple_addr = ""
                 else:
-                    triple.disconnect()
-                    ctx.interface_connected = False
+                    ctx.interface.disconnect()
                     ctx.show_triple_connected_message = True
-                    ctx.interface = citra
-                    await ctx.citra_connect()
+                    is_3ds = False
+                    if ctx.show_citra_connect_message:
+                        logger.info("Connecting to game...")
+                    ctx.show_citra_connect_message = False
+                    ctx.interface_connected = False
+                    if not await ctx.interface.connect("127.0.0.1", title_id):
+                        await asyncio.sleep(1)
+                    else:
+                        ctx.interface_connected = True
+                        ctx.initial_connect = True
+                        logger.info("Emulator connected!")
+                if ctx.initial_connect:
+                    if title_id == RANDOMIZER_APP_TITLE_ID:
+                        ctx.app_type = AppType.RANDOMIZER
+                    else:
+                        ctx.app_type = AppType.GAME
             else:
-                if ctx.initial_delay:
-                    delay = 1
-                    if ctx.interface == triple:
-                        delay = 5
-                    await asyncio.sleep(delay)
-                    ctx.initial_delay = False
-                await ctx.validate_rom()
+                if ctx.initial_connect or ctx.app_type == AppType.RANDOMIZER:
+                    await ctx.read_header()
                 if not ctx.invalid:
+                    ctx.initial_connect = False
                     await ctx.validate_seed()
                 if not ctx.invalid:
                     if await ctx.is_in_game():
                         await ctx.validate_save()
-                        if triple_addr == "" and ctx.interface == triple:
-                            ctx.interface_connected = False
-                            triple.disconnect()
-                        if not ctx.invalid and ctx.server_connected and (await ctx.get_pointers()):
-                            await ctx.check_locations()
+                        if not ctx.invalid and ctx.server_connected and await ctx.get_pointers():
+                            await ctx.read_data()
+                            if "DeathLink" in ctx.tags:
+                                await ctx.handle_deathlink()
+                            ctx.check_all_locations()
+                            ctx.scout_hints()
                             await ctx.get_item()
-                        else:
-                            ctx.initial_delay = True
+                            await ctx.send_message_queue()
                     else:
                         await ctx.get_null_item()
-        except CitraException as e:
+        except ConnectionError as e:
             logger.error(e)
-            logger.error(traceback.format_exc())
+            ctx.interface.disconnect()
             ctx.interface_connected = False
             ctx.last_error = ""
             ctx.show_citra_connect_message = True
-        except TripleException as e:
-            if str(e) != "":
-                logger.error(e)
-                logger.error(traceback.format_exc())
-            ctx.interface_connected = False
-            ctx.last_error = ""
-            ctx.show_citra_connect_message = True
-            ctx.interface = citra
+            ctx.show_triple_connected_message = True
         except Exception as e:
             logger.error(e)
             logger.error(traceback.format_exc())
@@ -442,6 +442,7 @@ async def game_watcher(ctx: OoT3DClientContext) -> None:
             ctx.server_connected = False
             ctx.last_error = ""
             ctx.show_citra_connect_message = True
+            ctx.show_triple_connected_message = True
         await asyncio.sleep(0.25)
 
 def launch_client(*launch_args) -> None:
