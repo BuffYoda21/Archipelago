@@ -53,7 +53,7 @@ class OoT3DWorld(World):
         clamp(self.options.ledge_cancel, ADVANCED)
         clamp(self.options.action_swap, ADVANCED)
         if self.options.action_swap.value == INTERMEDIATE:
-            self.options.quick_put_away.value = NOVICE # This specific glitch doesn't have an intermediate value
+            self.options.action_swap.value = NOVICE # This specific glitch doesn't have an intermediate value
         clamp(self.options.quick_put_away, EXPERT)
         clamp(self.options.hookshot_clip, INTERMEDIATE)
         clamp(self.options.hookshot_jump_bonk, ADVANCED)
