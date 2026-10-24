@@ -85,16 +85,6 @@ class OoT3DClientContext(CommonContext):
     server_connected: bool
     initial_delay: bool
     slot_data: Optional[Dict[str, any]]
-    save_ptr: int
-    event_flags_ptr: int
-    course_flags_ptr: int
-    minigame_ptr: int
-    event_flags: bytes
-    course_flags: List[bytes]
-    minigame_flags: int
-    course: int
-    stage: int
-    to_hint: List[int]
     invalid: bool
     last_error: str
     show_citra_connect_message: bool
@@ -121,15 +111,8 @@ class OoT3DClientContext(CommonContext):
     STAGE_SLOT_DATA: int = 0
     STAGE_ITEM_LOCATION_MAPPING: int = 1
 
-    # leftover stuff from albw
-    # remove later
+    # from ALBW, update with new address when we get there
     AP_HEADER_LOCATION: int = 0x6fe5f8
-    SAVES_LOCATION: int = 0x711de8
-    EVENTS_LOCATION: int = 0x70b728
-    COURSES_LOCATION: int = 0x70c8e0
-    MINIGAME_LOCATION: int = 0x70d858
-    GAME_LOCATION: int = 0x709df8
-    TASK_MAIN_GAME_VTABLE: int = 0x6d1db4
 
     def __init__(self, server_address: Optional[str], password: Optional[str]):
         super().__init__(server_address, password)
@@ -251,29 +234,12 @@ class OoT3DClientContext(CommonContext):
                 while (await self.interface.read(self.RANDOMIZER_APP_HEADER_LOCATION + self.AP_LOCK_OFFSET, 1)) != b"\x00":
                     await asyncio.sleep(0)
 
-    # ALBW Leftover
     async def validate_save(self) -> None:
-        self.save_ptr = 0
-        all_saves_ptr = await self.interface.read_u32(self.SAVES_LOCATION)
-        if all_saves_ptr != 0:
-            self.save_ptr = await self.interface.read_u32(all_saves_ptr + 0x14)
-        if all_saves_ptr == 0 or self.save_ptr == 0 or await self.interface.read_u32(self.save_ptr + 0x1600) != 0:
-            self.invalid = True
-            self.last_error = ""
-        elif await self.interface.read(self.save_ptr + 0xde0, 4) == b"\0\0\0\0":
-            self.error("The loaded save file is not an Archipelago save file. Choose a different save file.")
-        elif await self.interface.read(self.save_ptr + 0xde0, 4) != b"ARCH":
-            self.invalid = True
-            self.last_error = ""
-        elif await self.interface.read_u32(self.save_ptr + 0xde8) != await self.interface.read_u32(self.AP_HEADER_LOCATION + 0x8):
-            self.error("The loaded save file was created for a different multiworld. Choose a different save file.")
+        pass
 
-    # ALBW Leftover
     async def validate_seed(self) -> None:
         if not self.server_connected or not self.slot_data:
             self.invalid = True
-        # elif await self.interface.read_u32(self.AP_HEADER_LOCATION + 0x8) != self.slot_data["seed"]:
-        #     self.error("The patch was created for a different multiworld. Make sure you are using the right patch and connecting to the correct multiworld.")
 
     async def server_auth(self, password_requested: bool = False) -> None:
         if password_requested and not self.password:
@@ -287,74 +253,8 @@ class OoT3DClientContext(CommonContext):
             self.slot_data = args["slot_data"]
             self.server_connected = True
 
-        if cmd == "LocationInfo":
-            self.to_hint = [loc.location for loc in args["locations"]
-                if loc.flags & (ItemClassification.progression | ItemClassification.useful)]
-
-    # ALBW Leftover
-    async def get_pointers(self) -> bool:
-        self.event_flags_ptr = await self.interface.read_u32(self.EVENTS_LOCATION)
-        self.course_flags_ptr = await self.interface.read_u32(self.COURSES_LOCATION)
-        self.minigame_ptr = await self.interface.read_u32(self.MINIGAME_LOCATION)
-        if self.event_flags_ptr == 0 or self.course_flags_ptr == 0 or self.minigame_ptr == 0:
-            return False
-        return True
-
-    # ALBW Leftover
     async def is_in_game(self) -> bool:
         return False
-        framework = await self.interface.read_u32(self.AP_HEADER_LOCATION + 0x54)
-        if framework == 0:
-            return False
-        task_mgr = await self.interface.read_u32(framework + 0x1c)
-        start_node = task_mgr + 0x44
-        node = await self.interface.read_u32(start_node + 4)
-        loop_count = 0
-        while node != start_node and loop_count < 100:
-            task = await self.interface.read_u32(node + 8)
-            task_vtable = await self.interface.read_u32(task)
-            if task_vtable == self.TASK_MAIN_GAME_VTABLE:
-                return True
-            node = await self.interface.read_u32(node + 4)
-            loop_count += 1
-        return False
-
-    # ALBW Leftover
-    async def read_flags(self) -> None:
-        cur_event_flags = await self.interface.read(self.event_flags_ptr + 0x48, 0x80)
-        save_event_flags = await self.interface.read(self.save_ptr + 0x40, 0x80)
-        self.event_flags = bytes_or(cur_event_flags, save_event_flags)
-
-        cur_minigame_flags = (await self.interface.read(self.minigame_ptr + 0x35, 1))[0]
-        save_minigame_flags = (await self.interface.read(self.save_ptr + 0xda5, 1))[0]
-        self.minigame_flags = cur_minigame_flags | save_minigame_flags
-
-        for course in range(0, 0x20):
-            cur_course_flags = (await self.interface.read(self.course_flags_ptr + course * 0x16c + 0x160, 0x20)) \
-                             + (await self.interface.read(self.course_flags_ptr + course * 0x16c + 0x1a0, 0x10))
-            save_course_flags = await self.interface.read(self.save_ptr + 0x560 + course * 0x40, 0x40)
-            self.course_flags.append(bytes_or(cur_course_flags, save_course_flags))
-
-    # ALBW Leftover
-    def check_flag(self, course: Optional[int], flag: int) -> bool:
-        byte = flag >> 3
-        mask = 1 << (flag & 7)
-        if course is None:
-            return self.event_flags[byte] & mask != 0
-        else:
-            return self.course_flags[course][byte] & mask != 0
-
-    # def check_location(self, loc: LocationData):
-    #     return False
-
-    async def check_locations(self) -> None:
-        pass
-
-    async def get_item(self) -> None:
-        pass
-    
-    async def get_null_item(self) -> None:
-        pass
 
     async def disconnect(self, allow_autoreconnect: bool = False) -> None:
         await super().disconnect(allow_autoreconnect)
@@ -363,7 +263,6 @@ class OoT3DClientContext(CommonContext):
         self.app_connection_status = AppConnectionStatus.NOT_CONNECTED
         self.authenticating = False
 
-# Mostly ALBW Leftovers
 async def game_watcher(ctx: OoT3DClientContext) -> None:
     global triple_addr
     global is_3ds
@@ -417,16 +316,6 @@ async def game_watcher(ctx: OoT3DClientContext) -> None:
                 if not ctx.invalid:
                     if await ctx.is_in_game():
                         await ctx.validate_save()
-                        if not ctx.invalid and ctx.server_connected and await ctx.get_pointers():
-                            await ctx.read_data()
-                            if "DeathLink" in ctx.tags:
-                                await ctx.handle_deathlink()
-                            ctx.check_all_locations()
-                            ctx.scout_hints()
-                            await ctx.get_item()
-                            await ctx.send_message_queue()
-                    else:
-                        await ctx.get_null_item()
         except ConnectionError as e:
             logger.error(e)
             ctx.interface.disconnect()
