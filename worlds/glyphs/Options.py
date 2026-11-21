@@ -11,12 +11,12 @@ class Goal(Choice):
     Note: This option does not affect location/item pools so you still may have to complete more of the game than you would think.
     """
     display_name = "Completion Requirements"
-    option_false_ending = 1
-    option_good_ending = 2
-    option_true_ending = 3
-    option_all_star_endings = 4
-    option_epilogue = 5
-    option_all_endings = 6
+    option_false_ending = 0
+    option_good_ending = 1
+    option_true_ending = 2
+    option_all_star_endings = 3
+    option_epilogue = 4
+    option_all_endings = 5
     default = option_true_ending
 
 class StartingSword(Toggle):

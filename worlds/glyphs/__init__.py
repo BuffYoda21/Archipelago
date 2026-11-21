@@ -179,6 +179,10 @@ class GlyphsWorld(World):
                 "wraith_rune_count":            self.options.WraithRuneCount.value,
                 "wraith_glyphstone_count":      self.options.WraithGlyphstoneCount.value,
             },
+            "option_names": {
+                "goal":                 ["False Ending", "Good Ending", "True Ending", "All Star Endings", "Epilogue", "All Endings"],
+                "wraith_requirements":  ["None", "Vanilla", "Intended", "Silver Shards", "Gold Shards", "Smile Tokens", "Rune Cubes", "Glyphstones"],
+            },
             "shop_prices": prices,
             "button_colors": get_raw_button_color_data(self),
             "broken_buttons": get_broken_button_ids(self),
